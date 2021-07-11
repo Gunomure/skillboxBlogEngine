@@ -13,18 +13,12 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Table(name = "post_votes")
-public class PostVotes {
+public class PostVote {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(columnDefinition = "INT COMMENT 'id лайка/дизлайка'")
     private int id;
 
-    @NotNull
-    @Column(name = "user_id", columnDefinition = "INT COMMENT 'тот, кто поставил лайк / дизлайк'")
-    private int userId;
-    @NotNull
-    @Column(name = "post_id", columnDefinition = "INT COMMENT 'пост, которому поставлен лайк / дизлайк'")
-    private int postId;
     @NotNull
     @Column(columnDefinition = "datetime COMMENT 'дата и время лайка / дизлайка'")
     private LocalDateTime time;

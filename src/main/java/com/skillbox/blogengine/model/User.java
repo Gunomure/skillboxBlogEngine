@@ -3,12 +3,12 @@ package com.skillbox.blogengine.model;
 import lombok.*;
 import org.springframework.lang.Nullable;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Table(name = "users")
-public class Users {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(columnDefinition = "INT COMMENT 'id пользователя'")
@@ -44,4 +44,12 @@ public class Users {
     @Nullable
     @Column(columnDefinition = "text COMMENT 'фотография (ссылка на файл), может быть NULL'")
     private String photo;
+
+    @OneToMany
+    @JoinColumn(name = "user_id", columnDefinition = "INT NOT NULL COMMENT 'автор поста'")
+    private Set<Post> posts = new HashSet<>();
+
+    @OneToMany
+    @JoinColumn(name = "user_id", columnDefinition = "INT NOT NULL COMMENT 'тот, кто поставил лайк / дизлайк'")
+    private List<PostVote> postVotes;
 }

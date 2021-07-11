@@ -13,21 +13,24 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Table(name = "post_comments")
-public class PostComments {
+public class PostComment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(columnDefinition = "INT COMMENT 'id комментария'")
     private int id;
 
-    @Column(name = "parent_id", columnDefinition = "INT COMMENT 'комментарий, на который оставлен этот комментарий (может быть NULL, если комментарий оставлен просто к посту)'")
-    private int parentId;
+    @ManyToOne
+    @JoinColumn(name = "parent_id", columnDefinition = "INT COMMENT 'комментарий, на который оставлен этот комментарий (может быть NULL, если комментарий оставлен просто к посту)'")
+    private PostComment parent;
     @NotNull
-    @Column(name = "post_id", columnDefinition = "INT COMMENT 'пост, к которому написан комментарий'")
-    private int postId;
+    @ManyToOne
+    @JoinColumn(name = "post_id", columnDefinition = "INT COMMENT 'пост, к которому написан комментарий'")
+    private Post post;
     @NotNull
-    @Column(name = "user_id", columnDefinition = "INT COMMENT 'автор комментария'")
-    private int userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id", columnDefinition = "INT COMMENT 'автор комментария'")
+    private User user;
     @NotNull
     @Column(columnDefinition = "datetime COMMENT 'дата и время комментария'")
     private LocalDateTime time;

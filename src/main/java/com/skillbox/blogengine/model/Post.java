@@ -5,6 +5,10 @@ import lombok.*;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -13,7 +17,7 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Table(name = "posts")
-public class Posts {
+public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(columnDefinition = "INT COMMENT 'id поста'")
@@ -26,11 +30,10 @@ public class Posts {
     @Column(name = "moderation_status", columnDefinition = "enum('NEW','ACCEPTED', 'DECLINED') COMMENT 'статус модерации, по умолчанию значение \"NEW\"'")
     @Enumerated(EnumType.STRING)
     private ModerationStatus moderationStatus;
-    @Column(name = "moderator_id", columnDefinition = "INT COMMENT 'ID пользователя-модератора, принявшего решение, или NULL'")
-    private int moderatorId;
-    @NotNull
-    @Column(name = "user_id", columnDefinition = "INT COMMENT 'автор поста'")
-    private int userId;
+    @ManyToOne
+    @JoinColumn(name = "moderator_id", columnDefinition = "INT COMMENT 'ID пользователя-модератора, принявшего решение, или NULL'")
+    private User moderator;
+
     @NotNull
     @Column(columnDefinition = "datetime COMMENT 'дата и время публикации поста'")
     private LocalDateTime time;
@@ -43,4 +46,28 @@ public class Posts {
     @NotNull
     @Column(name = "view_count", columnDefinition = "INT COMMENT 'количество просмотров поста'")
     private int viewCount;
+
+    @OneToMany(
+            mappedBy = "post",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private Set<TagToPost> tags = new HashSet<>();
+
+    @OneToMany
+    @JoinColumn(name = "post_id", columnDefinition = "INT NOT NULL COMMENT 'пост, которому поставлен лайк / дизлайк'")
+    private List<PostVote> postVotes;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Post post = (Post) o;
+        return id == post.id && isActive == post.isActive && viewCount == post.viewCount && moderationStatus == post.moderationStatus && Objects.equals(moderator, post.moderator) && time.equals(post.time) && title.equals(post.title) && text.equals(post.text) && Objects.equals(tags, post.tags) && Objects.equals(postVotes, post.postVotes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, isActive, moderationStatus, moderator, time, title, text, viewCount, tags, postVotes);
+    }
 }
