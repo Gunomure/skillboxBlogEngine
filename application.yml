@@ -3,7 +3,7 @@ spring.datasource.driver-class-name: com.mysql.jdbc.Driver
 spring.jpa.database-platform: org.hibernate.dialect.MySQL5Dialect
 spring.datasource.username: root
 spring.datasource.password: qweqwe
-spring.jpa.hibernate.ddl-auto: create-drop
+spring.jpa.hibernate.ddl-auto: update
 spring:
   jpa:
     show-sql: true

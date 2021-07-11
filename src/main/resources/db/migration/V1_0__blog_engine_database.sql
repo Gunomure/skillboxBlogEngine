@@ -1,0 +1,22 @@
+create table captcha_codes (id INT COMMENT 'id каптча' not null auto_increment, code TINYTEXT COMMENT 'код, отображаемый на картинкке капчи' not null, secret_code TINYTEXT COMMENT 'код, передаваемый в параметре' not null, time datetime COMMENT 'дата и время генерации кода капчи' not null, primary key (id));
+create table global_settings (id INT COMMENT 'id настройки' not null auto_increment, code VARCHAR(255) COMMENT 'системное имя настройки' not null, name VARCHAR(255) COMMENT 'название настройки' not null, value VARCHAR(255) COMMENT 'значение настройки' not null, primary key (id));
+create table post_comments (id INT COMMENT 'id комментария' not null auto_increment, text text COMMENT 'текст комментария' not null, time datetime COMMENT 'дата и время комментария' not null, parent_id INT COMMENT 'комментарий, на который оставлен этот комментарий (может быть NULL, если комментарий оставлен просто к посту)', post_id INT COMMENT 'пост, к которому написан комментарий' not null, user_id INT COMMENT 'автор комментария' not null, primary key (id));
+create table post_votes (id INT COMMENT 'id лайка/дизлайка' not null auto_increment, time datetime COMMENT 'дата и время лайка / дизлайка' not null, value TINYINT COMMENT 'лайк или дизлайк: 1 или -1' not null, user_id INT NOT NULL COMMENT 'тот, кто поставил лайк / дизлайк', post_id INT NOT NULL COMMENT 'пост, которому поставлен лайк / дизлайк', primary key (id));
+create table posts (id INT COMMENT 'id поста' not null auto_increment, is_active TINYINT COMMENT 'скрыта или активна публикация: 0 или 1' not null, moderation_status enum('NEW','ACCEPTED', 'DECLINED') COMMENT 'статус модерации, по умолчанию значение "NEW"' not null, text text COMMENT 'текст поста' not null, time datetime COMMENT 'дата и время публикации поста' not null, title VARCHAR(255) COMMENT 'заголовок поста' not null, view_count INT COMMENT 'количество просмотров поста' not null, moderator_id INT COMMENT 'ID пользователя-модератора, принявшего решение, или NULL', user_id INT NOT NULL COMMENT 'автор поста', primary key (id));
+create table tag2post (id INT COMMENT 'id связи' not null auto_increment, post_id INT COMMENT 'id поста' not null, tag_id INT COMMENT 'id тэга' not null, primary key (id));
+create table tags (id INT COMMENT 'id тэга' not null auto_increment, name VARCHAR(255) COMMENT 'текст тэга' not null, primary key (id));
+create table users (id INT COMMENT 'id пользователя' not null auto_increment, code VARCHAR(255) COMMENT 'код для восстановления пароля, может быть NULL', email VARCHAR(255) COMMENT 'e-mail пользователя' not null, is_moderator TINYINT COMMENT 'является ли пользователь модератором (может ли править глобальные настройки сайта и модерировать посты)' not null, name VARCHAR(255) COMMENT 'имя пользователя' not null, password VARCHAR(255) COMMENT 'хэш пароля пользователя' not null, photo text COMMENT 'фотография (ссылка на файл), может быть NULL', reg_time datetime COMMENT 'дата и время регистрации пользователя' not null, primary key (id));
+alter table post_comments add constraint FKc3b7s6wypcsvua2ycn4o1lv2c foreign key (parent_id) references post_comments (id);
+alter table post_comments add constraint FKaawaqxjs3br8dw5v90w7uu514 foreign key (post_id) references posts (id);
+alter table post_comments add constraint FKsnxoecngu89u3fh4wdrgf0f2g foreign key (user_id) references users (id);
+alter table post_votes add constraint FK9q09ho9p8fmo6rcysnci8rocc foreign key (user_id) references users (id);
+alter table post_votes add constraint FK9jh5u17tmu1g7xnlxa77ilo3u foreign key (post_id) references posts (id);
+alter table posts add constraint FK6m7nr3iwh1auer2hk7rd05riw foreign key (moderator_id) references users (id);
+alter table posts add constraint FK5lidm6cqbc7u4xhqpxm898qme foreign key (user_id) references users (id);
+alter table tag2post add constraint FKpjoedhh4h917xf25el3odq20i foreign key (post_id) references posts (id);
+alter table tag2post add constraint FKjou6suf2w810t2u3l96uasw3r foreign key (tag_id) references tags (id);
+
+--prefill table with settings
+insert into global_settings(code, name, value) values ('MULTIUSER_MODE', 'Многопользовательский режим', 'NO');
+insert into global_settings(code, name, value) values ('POST_PREMODERATION', 'Премодерация постов', 'NO');
+insert into global_settings(code, name, value) values ('STATISTICS_IS_PUBLIC', 'Показывать всем статистику блога', 'NO');
