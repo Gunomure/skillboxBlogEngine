@@ -6,17 +6,3 @@ create table posts (id INT COMMENT 'id поста' not null auto_increment, is_a
 create table tag2post (id INT COMMENT 'id связи' not null auto_increment, post_id INT COMMENT 'id поста' not null, tag_id INT COMMENT 'id тэга' not null, primary key (id));
 create table tags (id INT COMMENT 'id тэга' not null auto_increment, name VARCHAR(255) COMMENT 'текст тэга' not null, primary key (id));
 create table users (id INT COMMENT 'id пользователя' not null auto_increment, code VARCHAR(255) COMMENT 'код для восстановления пароля, может быть NULL', email VARCHAR(255) COMMENT 'e-mail пользователя' not null, is_moderator TINYINT COMMENT 'является ли пользователь модератором (может ли править глобальные настройки сайта и модерировать посты)' not null, name VARCHAR(255) COMMENT 'имя пользователя' not null, password VARCHAR(255) COMMENT 'хэш пароля пользователя' not null, photo text COMMENT 'фотография (ссылка на файл), может быть NULL', reg_time datetime COMMENT 'дата и время регистрации пользователя' not null, primary key (id));
-alter table post_comments add constraint FKc3b7s6wypcsvua2ycn4o1lv2c foreign key (parent_id) references post_comments (id);
-alter table post_comments add constraint FKaawaqxjs3br8dw5v90w7uu514 foreign key (post_id) references posts (id);
-alter table post_comments add constraint FKsnxoecngu89u3fh4wdrgf0f2g foreign key (user_id) references users (id);
-alter table post_votes add constraint FK9q09ho9p8fmo6rcysnci8rocc foreign key (user_id) references users (id);
-alter table post_votes add constraint FK9jh5u17tmu1g7xnlxa77ilo3u foreign key (post_id) references posts (id);
-alter table posts add constraint FK6m7nr3iwh1auer2hk7rd05riw foreign key (moderator_id) references users (id);
-alter table posts add constraint FK5lidm6cqbc7u4xhqpxm898qme foreign key (user_id) references users (id);
-alter table tag2post add constraint FKpjoedhh4h917xf25el3odq20i foreign key (post_id) references posts (id);
-alter table tag2post add constraint FKjou6suf2w810t2u3l96uasw3r foreign key (tag_id) references tags (id);
-
---prefill table with settings
-insert into global_settings(code, name, value) values ('MULTIUSER_MODE', 'Многопользовательский режим', 'NO');
-insert into global_settings(code, name, value) values ('POST_PREMODERATION', 'Премодерация постов', 'NO');
-insert into global_settings(code, name, value) values ('STATISTICS_IS_PUBLIC', 'Показывать всем статистику блога', 'NO');

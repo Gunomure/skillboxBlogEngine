@@ -1,16 +1,12 @@
 package com.skillbox.blogengine.model;
 
-import lombok.*;
+import lombok.Data;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Setter
 @Entity
 @Table(name = "post_votes")
 public class PostVote {
@@ -25,4 +21,14 @@ public class PostVote {
     @NotNull
     @Column(columnDefinition = "TINYINT COMMENT 'лайк или дизлайк: 1 или -1'")
     private boolean value;
+
+    @NotNull
+    @ManyToOne
+    @JoinColumn(name = "user_id", columnDefinition = "INT NOT NULL COMMENT 'тот, кто поставил лайк / дизлайк'")
+    private User user;
+
+    @NotNull
+    @ManyToOne
+    @JoinColumn(name = "post_id", columnDefinition = "INT NOT NULL COMMENT 'пост, которому поставлен лайк / дизлайк'")
+    private Post post;
 }
