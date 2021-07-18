@@ -1,20 +1,14 @@
 package com.skillbox.blogengine.model;
 
-import lombok.*;
+import lombok.Data;
 import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Setter
 @Entity
 @Table(name = "users")
 public class User {
@@ -47,9 +41,8 @@ public class User {
 
     @OneToMany
     @JoinColumn(name = "user_id", columnDefinition = "INT NOT NULL COMMENT 'автор поста'")
-    private Set<Post> posts = new HashSet<>();
+    private Set<Post> posts;
 
-    @OneToMany
-    @JoinColumn(name = "user_id", columnDefinition = "INT NOT NULL COMMENT 'тот, кто поставил лайк / дизлайк'")
-    private List<PostVote> postVotes;
+    @OneToMany(mappedBy = "user")
+    private Set<PostVote> postVotes;
 }

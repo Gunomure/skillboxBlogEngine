@@ -1,20 +1,14 @@
 package com.skillbox.blogengine.model;
 
-import lombok.*;
+import lombok.Data;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Setter
 @Entity
 @Table(name = "posts")
 public class Post {
@@ -52,11 +46,10 @@ public class Post {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private Set<TagToPost> tags = new HashSet<>();
+    private Set<TagToPost> tags;
 
-    @OneToMany
-    @JoinColumn(name = "post_id", columnDefinition = "INT NOT NULL COMMENT 'пост, которому поставлен лайк / дизлайк'")
-    private List<PostVote> postVotes;
+    @OneToMany(mappedBy = "post")
+    private Set<PostVote> postVotes;
 
     @Override
     public boolean equals(Object o) {

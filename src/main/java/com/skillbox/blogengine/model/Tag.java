@@ -1,18 +1,13 @@
 package com.skillbox.blogengine.model;
 
-import lombok.*;
+import lombok.Data;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Setter
 @Entity
 @Table(name = "tags")
 public class Tag {
@@ -31,7 +26,7 @@ public class Tag {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private Set<TagToPost> posts = new HashSet<>();
+    private Set<TagToPost> posts;
 
     @Override
     public boolean equals(Object o) {
