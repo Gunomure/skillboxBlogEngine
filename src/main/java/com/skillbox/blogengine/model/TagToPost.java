@@ -1,15 +1,12 @@
 package com.skillbox.blogengine.model;
 
-import lombok.*;
+import lombok.Data;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.Objects;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Setter
 @Entity
 @Table(name = "tag2post")
 public class TagToPost {
@@ -20,9 +17,24 @@ public class TagToPost {
     private int id;
 
     @NotNull
-    @Column(name = "post_id", columnDefinition = "INT COMMENT 'id поста'")
-    private int postId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id")
+    private Post post;
     @NotNull
-    @Column(name = "tag_id", columnDefinition = "INT COMMENT 'id тэга'")
-    private int tagId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tag_id")
+    private Tag tag;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TagToPost tagToPost = (TagToPost) o;
+        return id == tagToPost.id && post.equals(tagToPost.post) && tag.equals(tagToPost.tag);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, post, tag);
+    }
 }
