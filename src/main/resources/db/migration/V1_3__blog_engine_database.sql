@@ -12,9 +12,9 @@ insert into posts(is_active, moderation_status, moderator_id, user_id, `time`, t
 ,(true, 'DECLINED', 1, 1, now(), 'title 5', 'post text 5', 10000)
 ,(true, 'DECLINED', 1, 1, now(), 'title 6', 'post text 6', 100000)
 ,(true, 'DECLINED', 1, 1, now(), 'title 7', 'post text 7', 999)
-,(true, 'DECLINED', 1, 1, now(), 'title 8', 'post text 8', -1)
-,(true, 'DECLINED', 1, 1, now(), 'title 9', 'post text 9', 0)
-,(true, 'DECLINED', 1, 1, now(), 'title 10', 'post text 10', 2)
+,(true, 'NEW', 1, 1, now(), 'title 8', 'post text 8', -1)
+,(true, 'NEW', 1, 1, now(), 'title 9', 'post text 9', 0)
+,(true, 'NEW', 1, 1, now(), 'title 10', 'post text 10', 2)
 ,(true, 'DECLINED', 1, 1, now(), 'title 11', 'post text 11', 2)
 ;
 

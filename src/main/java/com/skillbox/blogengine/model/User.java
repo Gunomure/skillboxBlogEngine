@@ -39,10 +39,29 @@ public class User {
     @Column(columnDefinition = "text COMMENT 'фотография (ссылка на файл), может быть NULL'")
     private String photo;
 
-    @OneToMany
-    @JoinColumn(name = "user_id", columnDefinition = "INT NOT NULL COMMENT 'автор поста'")
+    @OneToMany(mappedBy = "author")
     private Set<Post> posts;
+
+    @OneToMany(mappedBy = "moderator")
+    private Set<Post> postsModerated;
 
     @OneToMany(mappedBy = "user")
     private Set<PostVote> postVotes;
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", isModerator=" + isModerator +
+                ", regTime=" + regTime +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", code='" + code + '\'' +
+                ", photo='" + photo + '\'' +
+                ", posts=" + posts.size() +
+                ", postsModerated=" + postsModerated.size() +
+                ", postVotes=" + postVotes +
+                '}';
+    }
 }
