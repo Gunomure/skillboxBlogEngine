@@ -45,6 +45,10 @@ public class Post {
     @Column(name = "view_count", columnDefinition = "INT COMMENT 'количество просмотров поста'")
     private int viewCount;
 
+    @OneToMany(mappedBy = "post")
+    private Set<PostComment> comments;
+
+
     @OneToMany(
             mappedBy = "post",
             cascade = CascadeType.ALL,

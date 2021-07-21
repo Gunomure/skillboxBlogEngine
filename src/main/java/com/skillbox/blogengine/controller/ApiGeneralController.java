@@ -1,29 +1,34 @@
 package com.skillbox.blogengine.controller;
 
-import com.skillbox.blogengine.dto.GlobalSettingsResponse;
-import com.skillbox.blogengine.dto.InitResponse;
-import com.skillbox.blogengine.dto.NotAuthorizedUser;
-import com.skillbox.blogengine.dto.UserResponse;
+import com.skillbox.blogengine.dto.*;
 import com.skillbox.blogengine.service.GlobalSettingsService;
+import com.skillbox.blogengine.service.PostService;
 import com.skillbox.blogengine.service.UserService;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
 public class ApiGeneralController {
-    final static Logger LOGGER = Logger.getLogger(ApiGeneralController.class);
+    final static Logger LOGGER = LogManager.getLogger(ApiGeneralController.class);
 
     private InitResponse initResponse;
     private GlobalSettingsService settingsService;
     private UserService userService;
+    private PostService postService;
 
-    public ApiGeneralController(InitResponse initResponse, GlobalSettingsService settingsService, UserService userService) {
+    public ApiGeneralController(InitResponse initResponse, GlobalSettingsService settingsService, UserService userService, PostService postService) {
         this.initResponse = initResponse;
         this.settingsService = settingsService;
         this.userService = userService;
+        this.postService = postService;
     }
 
     @GetMapping("/init")
@@ -50,6 +55,12 @@ public class ApiGeneralController {
 //        }
 
         return new NotAuthorizedUser();
+    }
+
+    @GetMapping("/post")
+    private PostResponse getPosts(@RequestParam int offset, @RequestParam int limit, @RequestParam ModeType mode) {
+        LOGGER.info("Get posts with parameters:\noffset = {}, limit = {}, mode = {}", offset, limit, mode);
+        return new PostResponse(postService.selectByParameters(offset, limit, mode));
     }
 
 }
