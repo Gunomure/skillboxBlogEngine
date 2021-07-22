@@ -1,9 +1,9 @@
-package com.skillbox.blogengine.dto;
+package com.skillbox.blogengine.model.custom;
 
 import lombok.Data;
 
 @Data
-public class PostWithAdditionalInfo {
+public class PostUserCounts {
     private int id;
     private long timestamp;
     private int userId;

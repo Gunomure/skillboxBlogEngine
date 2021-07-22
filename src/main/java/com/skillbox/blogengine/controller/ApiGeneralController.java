@@ -11,8 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
@@ -58,9 +57,12 @@ public class ApiGeneralController {
     }
 
     @GetMapping("/post")
-    private PostResponse getPosts(@RequestParam int offset, @RequestParam int limit, @RequestParam ModeType mode) {
+    private PostResponse getPosts(@RequestParam Integer offset, @RequestParam Integer limit, @RequestParam ModeType mode) {
         LOGGER.info("Get posts with parameters:\noffset = {}, limit = {}, mode = {}", offset, limit, mode);
-        return new PostResponse(postService.selectByParameters(offset, limit, mode));
+        return PostResponse.map(postService.selectByParameters(
+                Optional.ofNullable(offset).orElse(0),
+                Optional.ofNullable(limit).orElse(10),
+                Optional.ofNullable(mode).orElse(ModeType.recent)));
     }
 
 }

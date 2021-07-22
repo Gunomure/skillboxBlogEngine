@@ -1,7 +1,7 @@
 package com.skillbox.blogengine.service;
 
 import com.skillbox.blogengine.dto.ModeType;
-import com.skillbox.blogengine.dto.PostWithAdditionalInfo;
+import com.skillbox.blogengine.model.custom.PostUserCounts;
 import com.skillbox.blogengine.orm.PostRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,8 +46,8 @@ public class PostService {
         }
     }
 
-    public List<PostWithAdditionalInfo> selectByParameters(int offset, int limit, ModeType mode) {
-        List<PostWithAdditionalInfo> posts = new ArrayList<>();
+    public List<PostUserCounts> selectByParameters(int offset, int limit, ModeType mode) {
+        List<PostUserCounts> posts = new ArrayList<>();
         String select = "select p.id AS id" +
                 "     , UNIX_TIMESTAMP(p.time)            AS timestamp" +
                 "     , a.id                              AS userId" +
@@ -80,7 +80,7 @@ public class PostService {
                 break;
         }
         try (Session session = sessionFactory.openSession()) {
-            Query query = session.createQuery(select).setResultTransformer(Transformers.aliasToBean(PostWithAdditionalInfo.class));
+            Query query = session.createQuery(select).setResultTransformer(Transformers.aliasToBean(PostUserCounts.class));
             posts = query.list();
             posts = posts.subList(offset, Math.min(offset + limit, posts.size()));
         } catch (Exception e) {
