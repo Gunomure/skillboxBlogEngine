@@ -54,7 +54,7 @@ public class Post {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private Set<TagToPost> tags;
+    private Set<TagToPost> tagToPost;
 
     @OneToMany(mappedBy = "post")
     private Set<PostVote> postVotes;
@@ -64,12 +64,12 @@ public class Post {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Post post = (Post) o;
-        return id == post.id && isActive == post.isActive && viewCount == post.viewCount && moderationStatus == post.moderationStatus && Objects.equals(moderator, post.moderator) && author.equals(post.author) && time.equals(post.time) && title.equals(post.title) && text.equals(post.text) && tags.equals(post.tags) && postVotes.equals(post.postVotes);
+        return id == post.id && isActive == post.isActive && viewCount == post.viewCount && moderationStatus == post.moderationStatus && Objects.equals(moderator, post.moderator) && author.equals(post.author) && time.equals(post.time) && title.equals(post.title) && text.equals(post.text) && tagToPost.equals(post.tagToPost) && postVotes.equals(post.postVotes);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, isActive, moderationStatus, moderator, author, time, title, text, viewCount, tags, postVotes);
+        return Objects.hash(id, isActive, moderationStatus, moderator, author, time, title, text, viewCount, tagToPost, postVotes);
     }
 
     @Override
@@ -84,7 +84,7 @@ public class Post {
                 ", title='" + title + '\'' +
                 ", text='" + text + '\'' +
                 ", viewCount=" + viewCount +
-                ", tags=" + tags +
+                ", tags=" + tagToPost +
                 ", postVotes=" + postVotes +
                 '}';
     }

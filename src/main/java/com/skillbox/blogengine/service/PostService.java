@@ -89,4 +89,8 @@ public class PostService {
 
         return posts;
     }
+
+    public long count() {
+        return postRepository.count();
+    }
 }

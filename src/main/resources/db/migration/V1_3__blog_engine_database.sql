@@ -24,6 +24,15 @@ values (true, 'NEW', 2, 1, now(), 'title 1', 'post text 1', 1)
      , (true, 'DECLINED', 1, 1, now(), 'title 14', 'post text 14', 2)
 ;
 
+insert into tag2post(post_id, tag_id)
+values (1, 1)
+     , (2, 1)
+     , (3, 1)
+     , (3, 2)
+     , (4, 1)
+     , (5, 2)
+     , (6, 2);
+
 insert into post_comments(text, time, parent_id, post_id, user_id)
 values ('comment text 1', now(), null, 1, 1)
      , ('comment text 2', now(), 1, 1, 2)
