@@ -72,7 +72,6 @@ public class ApiGeneralController {
 
     @GetMapping("/tag")
     private TagResponse getTags() {
-        LOGGER.info("Search tags with!!!!!!!!!!!!!!!!");
         List<TagUsageStatistics> tagUsageStatistics = tagService.selectTagsStatistics("");
         long postsCount = postService.count();
 
