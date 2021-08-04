@@ -3,6 +3,7 @@ package com.skillbox.blogengine.controllers;
 import com.skillbox.blogengine.dto.InitResponse;
 import com.skillbox.blogengine.dto.NotAuthorizedUser;
 import com.skillbox.blogengine.dto.PostResponse;
+import com.skillbox.blogengine.dto.TagResponse;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.Customization;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -259,14 +260,82 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
                 new CustomComparator(JSONCompareMode.STRICT,
                         new Customization("posts[*].timestamp", (o1, o2) -> true)));
     }
+
+    @Test
+    void getTagsStartWith() throws Exception {
+        TagResponse tagResponse = new TagResponse();
+        List<TagResponse.WeightedTag> tags = new ArrayList<>();
+        tags.add(new TagResponse.WeightedTag("tag1", 1.0));
+        tags.add(new TagResponse.WeightedTag("tag2", 0.75));
+        tagResponse.setTags(tags);
+
+        String expectedResponse = mapper.writeValueAsString(tagResponse);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/tag")
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("query", "tag")
+        ).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedResponse));
+    }
+
+    @Test
+    void getTagsMiddleWith() throws Exception {
+        TagResponse tagResponse = new TagResponse();
+        List<TagResponse.WeightedTag> tags = new ArrayList<>();
+        tags.add(new TagResponse.WeightedTag("tag1", 1.0));
+        tags.add(new TagResponse.WeightedTag("tag2", 0.75));
+        tagResponse.setTags(tags);
+
+        String expectedResponse = mapper.writeValueAsString(tagResponse);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/tag")
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("query", "ag")
+        ).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedResponse));
+    }
+
+    @Test
+    void getTagsEndWith() throws Exception {
+        TagResponse tagResponse = new TagResponse();
+        List<TagResponse.WeightedTag> tags = new ArrayList<>();
+        tags.add(new TagResponse.WeightedTag("tag2", 1.0));
+        tagResponse.setTags(tags);
+
+        String expectedResponse = mapper.writeValueAsString(tagResponse);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/tag")
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("query", "2")
+        ).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedResponse));
+    }
+
+    @Test
+    void getTagsWithUpperCase() throws Exception {
+        TagResponse tagResponse = new TagResponse();
+        List<TagResponse.WeightedTag> tags = new ArrayList<>();
+        tags.add(new TagResponse.WeightedTag("tag1", 1.0));
+        tags.add(new TagResponse.WeightedTag("tag2", 0.75));
+        tagResponse.setTags(tags);
+
+        String expectedResponse = mapper.writeValueAsString(tagResponse);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/tag")
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("query", "tAg")
+        ).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedResponse));
+    }
+
     /**
      * TODO добавить тесты на проверку:
+     *
      * 1 строка announce обрезается до 150 символов
      * 2 из строки announce удаляются html тэги
-     * 3 тесты на тэги
-     * 3.1 lowercase, uppercase
-     * 3.2 поиск на началу названия тэга
-     * 3.3 поиск на середине названия тэга
-     * 3.4 поиск на окончанию названия тэга
      */
 }
