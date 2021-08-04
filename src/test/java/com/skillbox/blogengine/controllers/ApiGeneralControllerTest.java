@@ -15,6 +15,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.skillbox.blogengine.initializer.Mysql.mysqlContainer;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -222,7 +224,7 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/post")
                 .contentType(MediaType.APPLICATION_JSON)
                 .param("offset", "2")
-                .param("limit", "10")
+                .param("limit", "1")
                 .param("mode", "recent")
         ).andDo(print())
                 .andExpect(status().isOk())
@@ -257,4 +259,9 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
                 new CustomComparator(JSONCompareMode.STRICT,
                         new Customization("posts[*].timestamp", (o1, o2) -> true)));
     }
+    /**
+     * TODO добавить тесты на проверку:
+     * 1 строка announce обрезается до 150 символов
+     * 2 из строки announce удаляются html тэги
+     */
 }

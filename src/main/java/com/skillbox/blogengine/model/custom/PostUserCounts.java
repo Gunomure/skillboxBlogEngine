@@ -1,8 +1,10 @@
 package com.skillbox.blogengine.model.custom;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class PostUserCounts {
     private int id;
     private long timestamp;
@@ -13,5 +15,5 @@ public class PostUserCounts {
     private long likeCount;
     private long dislikeCount;
     private long commentCount;
-    private long viewCount;
+    private int viewCount;
 }

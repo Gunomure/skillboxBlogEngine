@@ -19,7 +19,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api")
 public class ApiGeneralController {
-    final static Logger LOGGER = LogManager.getLogger(ApiGeneralController.class);
+    private final static Logger LOGGER = LogManager.getLogger(ApiGeneralController.class);
 
     private InitResponse initResponse;
     private GlobalSettingsService settingsService;

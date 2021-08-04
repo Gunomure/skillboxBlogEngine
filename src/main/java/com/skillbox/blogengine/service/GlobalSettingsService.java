@@ -11,7 +11,7 @@ import java.util.List;
 @Service
 public class GlobalSettingsService {
 
-    final static Logger LOGGER = Logger.getLogger(GlobalSettingsService.class);
+    private final static Logger LOGGER = Logger.getLogger(GlobalSettingsService.class);
     private final GlobalSettingsRepository settingsRepository;
 
 
@@ -20,13 +20,6 @@ public class GlobalSettingsService {
     }
 
     public List<GlobalSetting> selectAll() {
-        List<GlobalSetting> settings = new ArrayList<>();
-        try {
-            settingsRepository.findAll().forEach(settings::add);
-            return settings;
-        } catch (Exception e) {
-            LOGGER.error("Got error while selecting all data from table global_settings", e);
-        }
-        return settings;
+        return new ArrayList<>(settingsRepository.findAll());
     }
 }

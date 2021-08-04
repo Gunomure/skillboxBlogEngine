@@ -12,7 +12,7 @@ import java.util.List;
 @Service
 public class UserService {
 
-    final static Logger LOGGER = Logger.getLogger(UserService.class);
+    private final static Logger LOGGER = Logger.getLogger(UserService.class);
     private final UserRepository userRepository;
 
     public UserService(UserRepository userRepository) {
@@ -20,14 +20,7 @@ public class UserService {
     }
 
     public List<User> selectAll() {
-        List<User> users = new ArrayList<>();
-        try {
-            userRepository.findAll().forEach(users::add);
-            return users;
-        } catch (Exception e) {
-            LOGGER.error("Got error while selecting all data from table users", e);
-        }
-        return users;
+        return new ArrayList<>(userRepository.findAll());
     }
 
     public User getById(int id) {
