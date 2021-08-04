@@ -15,10 +15,23 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.skillbox.blogengine.initializer.Mysql.mysqlContainer;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 public class ApiGeneralControllerTest extends AbstractIntegrationTest {
+
+    @Test
+    public void isRunningTest() throws InterruptedException {
+        System.out.println(mysqlContainer.isRunning());
+        System.out.println(mysqlContainer.getHost());
+        System.out.println(mysqlContainer.getJdbcUrl());
+        System.out.println(mysqlContainer.getUsername());
+        System.out.println(mysqlContainer.getPassword());
+        assertTrue("Container is started and running", mysqlContainer.isRunning());
+        Thread.sleep(1000000);
+    }
 
     @Test
     void getInitTest() throws Exception {
@@ -257,4 +270,9 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
                 new CustomComparator(JSONCompareMode.STRICT,
                         new Customization("posts[*].timestamp", (o1, o2) -> true)));
     }
+    /**
+     * TODO добавить тесты на проверку:
+     * 1 строка announce обрезается до 150 символов
+     * 2 из строки announce удаляются html тэги
+     */
 }
