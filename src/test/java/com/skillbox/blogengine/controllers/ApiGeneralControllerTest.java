@@ -263,5 +263,10 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
      * TODO добавить тесты на проверку:
      * 1 строка announce обрезается до 150 символов
      * 2 из строки announce удаляются html тэги
+     * 3 тесты на тэги
+     * 3.1 lowercase, uppercase
+     * 3.2 поиск на началу названия тэга
+     * 3.3 поиск на середине названия тэга
+     * 3.4 поиск на окончанию названия тэга
      */
 }
