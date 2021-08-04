@@ -18,7 +18,6 @@ import static com.skillbox.blogengine.initializer.Mysql.mysqlContainer;
 @ContextConfiguration(initializers = {
         Mysql.Initializer.class
 })
-//@Testcontainers
 @ActiveProfiles("test-containers")
 public abstract class AbstractIntegrationTest {
     /**

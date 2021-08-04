@@ -8,8 +8,7 @@ import org.testcontainers.containers.MySQLContainer;
 
 @UtilityClass
 public class Mysql {
-    public static final MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0")
-            .withDatabaseName("test").withUsername("test").withPassword("test");
+    public static final MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0.26");
 
     public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 

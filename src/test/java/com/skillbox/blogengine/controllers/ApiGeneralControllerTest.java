@@ -23,17 +23,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ApiGeneralControllerTest extends AbstractIntegrationTest {
 
     @Test
-    public void isRunningTest() throws InterruptedException {
-        System.out.println(mysqlContainer.isRunning());
-        System.out.println(mysqlContainer.getHost());
-        System.out.println(mysqlContainer.getJdbcUrl());
-        System.out.println(mysqlContainer.getUsername());
-        System.out.println(mysqlContainer.getPassword());
-        assertTrue("Container is started and running", mysqlContainer.isRunning());
-        Thread.sleep(1000000);
-    }
-
-    @Test
     void getInitTest() throws Exception {
         InitResponse initResponse = new InitResponse();
         initResponse.setTitle("DevPub");
@@ -235,7 +224,7 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/post")
                 .contentType(MediaType.APPLICATION_JSON)
                 .param("offset", "2")
-                .param("limit", "10")
+                .param("limit", "1")
                 .param("mode", "recent")
         ).andDo(print())
                 .andExpect(status().isOk())
