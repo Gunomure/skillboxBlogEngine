@@ -62,17 +62,16 @@ public class ApiGeneralController {
     }
 
     @GetMapping("/post")
-    private PostResponse getPosts(@RequestParam Integer offset, @RequestParam Integer limit, @RequestParam ModeType mode) {
+    private PostResponse getPosts(@RequestParam(defaultValue = "0") Integer offset,
+                                  @RequestParam(defaultValue = "10") Integer limit,
+                                  @RequestParam(defaultValue = "recent") ModeType mode) {
         LOGGER.info("Get posts with parameters:\noffset = {}, limit = {}, mode = {}", offset, limit, mode);
-        return PostResponse.map(postService.selectByParameters(
-                Optional.ofNullable(offset).orElse(0),
-                Optional.ofNullable(limit).orElse(10),
-                Optional.ofNullable(mode).orElse(ModeType.recent)));
+        return PostResponse.map(postService.selectByParameters(offset, limit, mode));
     }
 
     @GetMapping("/tag")
-    private TagResponse getTags() {
-        List<TagUsageStatistics> tagUsageStatistics = tagService.selectTagsStatistics("");
+    private TagResponse getTags(@RequestParam(defaultValue = "") String query) {
+        List<TagUsageStatistics> tagUsageStatistics = tagService.selectTagsStatistics(query);
         long postsCount = postService.count();
 
         return TagResponse.map(tagUsageStatistics, postsCount);
