@@ -61,7 +61,15 @@ public class ApiGeneralController {
                                   @RequestParam(defaultValue = "10") Integer limit,
                                   @RequestParam(defaultValue = "recent") ModeType mode) {
         LOGGER.info("Get posts with parameters:\noffset = {}, limit = {}, mode = {}", offset, limit, mode);
-        return postService.selectByParameters(offset, limit, mode);
+        return postService.selectAllPostsByParameters(offset, limit, mode);
+    }
+
+    @GetMapping("/post/search")
+    private PostResponse getPosts(@RequestParam(defaultValue = "0") Integer offset,
+                                  @RequestParam(defaultValue = "10") Integer limit,
+                                  @RequestParam(defaultValue = "") String query) {
+        LOGGER.info("Get posts with parameters:\noffset = {}, limit = {}, query = {}", offset, limit, query);
+        return postService.selectFilteredPostsByParameters(offset, limit, query);
     }
 
     @GetMapping("/tag")

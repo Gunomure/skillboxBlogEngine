@@ -16,8 +16,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.skillbox.blogengine.initializer.Mysql.mysqlContainer;
-import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -330,6 +328,86 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
         ).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedResponse));
+    }
+
+    @Test
+    void getPostsSearchWithoutParametersTest() throws Exception {
+        List<PostResponse.PostInfo> posts = new ArrayList<>();
+        posts.add(new PostResponse.PostInfo(4, 1,
+                new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 4", "post text 4...", 0, 0, 0, 1000));
+        posts.add(new PostResponse.PostInfo(3, 1,
+                new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 3", "post text 3...", 2, 1, 0, 100));
+        posts.add(new PostResponse.PostInfo(2, 1,
+                new PostResponse.PostInfo.UserInfo(1, "user_name1"), "title 2", "post text 2...", 0, 0, 1, 10));
+
+        PostResponse postResponse = new PostResponse();
+        postResponse.setPosts(posts);
+        postResponse.setCount(3);
+        String expectedResponse = mapper.writeValueAsString(postResponse);
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/post/search")
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+        // игнорируем поле timestamp, так как оно может меняться в зависимости от времени запуска миграции
+        JSONAssert.assertEquals(expectedResponse, mvcResult.getResponse().getContentAsString(),
+                new CustomComparator(JSONCompareMode.STRICT,
+                        new Customization("posts[*].timestamp", (o1, o2) -> true)));
+    }
+
+    @Test
+    void getPostsSearchWithEmptyQueryTest() throws Exception {
+        List<PostResponse.PostInfo> posts = new ArrayList<>();
+        posts.add(new PostResponse.PostInfo(4, 1,
+                new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 4", "post text 4...", 0, 0, 0, 1000));
+        posts.add(new PostResponse.PostInfo(3, 1,
+                new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 3", "post text 3...", 2, 1, 0, 100));
+        posts.add(new PostResponse.PostInfo(2, 1,
+                new PostResponse.PostInfo.UserInfo(1, "user_name1"), "title 2", "post text 2...", 0, 0, 1, 10));
+
+        PostResponse postResponse = new PostResponse();
+        postResponse.setPosts(posts);
+        postResponse.setCount(3);
+        String expectedResponse = mapper.writeValueAsString(postResponse);
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/post/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                .param("offset", "0")
+                .param("limit", "10")
+                .param("query", "")
+        ).andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+        // игнорируем поле timestamp, так как оно может меняться в зависимости от времени запуска миграции
+        JSONAssert.assertEquals(expectedResponse, mvcResult.getResponse().getContentAsString(),
+                new CustomComparator(JSONCompareMode.STRICT,
+                        new Customization("posts[*].timestamp", (o1, o2) -> true)));
+    }
+
+    @Test
+    void getPostsSearchWithCustomQueryTest() throws Exception {
+        List<PostResponse.PostInfo> posts = new ArrayList<>();
+        posts.add(new PostResponse.PostInfo(3, 1,
+                new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 3", "post text 3...", 2, 1, 0, 100));
+
+        PostResponse postResponse = new PostResponse();
+        postResponse.setPosts(posts);
+        postResponse.setCount(1);
+        String expectedResponse = mapper.writeValueAsString(postResponse);
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/post/search")
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("offset", "0")
+                .param("limit", "10")
+                .param("query", "3")
+        ).andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+        // игнорируем поле timestamp, так как оно может меняться в зависимости от времени запуска миграции
+        JSONAssert.assertEquals(expectedResponse, mvcResult.getResponse().getContentAsString(),
+                new CustomComparator(JSONCompareMode.STRICT,
+                        new Customization("posts[*].timestamp", (o1, o2) -> true)));
     }
 
     /**

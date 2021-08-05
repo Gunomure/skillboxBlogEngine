@@ -26,33 +26,30 @@ public class PostService {
         this.postRepository = postRepository;
     }
 
-    public PostResponse selectByParameters(int offset, int limit, ModeType mode) {
-        List<PostUserCounts> posts;
+    public PostResponse selectAllPostsByParameters(int offset, int limit, ModeType mode) {
+        PageRequest pageRequest;
         switch (mode) {
             case popular:
-                posts = postRepository
-                        .findPostsInfoPageable(PageRequest.of(offset, limit, Sort.by("commentCount")
-                                .descending()));
+                pageRequest = PageRequest.of(offset, limit, Sort.by("commentCount").descending());
                 break;
             case best:
-                posts = postRepository
-                        .findPostsInfoPageable(PageRequest.of(offset, limit, Sort.by("likeCount")
-                                .descending()));
+                pageRequest = PageRequest.of(offset, limit, Sort.by("likeCount").descending());
                 break;
             case early:
-                posts = postRepository
-                        .findPostsInfoPageable(PageRequest.of(offset, limit, Sort.by("timestamp")
-                                .descending()));
+                pageRequest = PageRequest.of(offset, limit, Sort.by("timestamp").descending());
                 break;
             default:
 //                 recent тоже считается дефолтным
-                posts = postRepository
-                        .findPostsInfoPageable(PageRequest.of(offset, limit, Sort.by("timestamp")
-                                .ascending()));
+                pageRequest = PageRequest.of(offset, limit, Sort.by("timestamp").ascending());
                 break;
         }
 
-        return map(posts);
+        return map(postRepository.findPostsInfoPageable("", pageRequest));
+    }
+
+    public PostResponse selectFilteredPostsByParameters(int offset, int limit, String query) {
+        PageRequest pageRequest = PageRequest.of(offset, limit, Sort.by("timestamp").ascending());
+        return map(postRepository.findPostsInfoPageable(query, pageRequest));
     }
 
     public long count() {
