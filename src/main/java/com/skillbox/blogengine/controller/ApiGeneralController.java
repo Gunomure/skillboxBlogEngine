@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
+
 @RestController
 @RequestMapping("/api")
 public class ApiGeneralController {
@@ -75,5 +77,15 @@ public class ApiGeneralController {
     @GetMapping("/tag")
     private TagResponse getTags(@RequestParam(defaultValue = "") String query) {
         return tagService.selectTagsStatistics(query);
+    }
+
+    @GetMapping("/calendar")
+    private CalendarResponse getCalendar(@RequestParam(defaultValue = "-1") int year) {
+        // TODO возможно есть вариант получше, чем задавать -1
+        if (year < 0) {
+            year = LocalDate.now().getYear();
+        }
+
+        return postService.selectPostsCountsByYear(year);
     }
 }

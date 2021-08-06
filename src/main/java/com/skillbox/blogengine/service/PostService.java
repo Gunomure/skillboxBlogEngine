@@ -2,7 +2,9 @@ package com.skillbox.blogengine.service;
 
 import com.skillbox.blogengine.dto.ModeType;
 import com.skillbox.blogengine.dto.PostResponse;
+import com.skillbox.blogengine.dto.CalendarResponse;
 import com.skillbox.blogengine.model.custom.PostUserCounts;
+import com.skillbox.blogengine.model.custom.PostsCountPerDate;
 import com.skillbox.blogengine.orm.PostRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,7 +14,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class PostService {
@@ -54,6 +58,23 @@ public class PostService {
 
     public long count() {
         return postRepository.count();
+    }
+
+    public CalendarResponse selectPostsCountsByYear(int year) {
+        List<PostsCountPerDate> postsCountPerDates = postRepository.findPostsCountPerDateByYear(year);
+        List<Integer> distinctByTime = postRepository.findDistinctYears();
+        return mapPostsCountsPerYear(distinctByTime, postsCountPerDates);
+    }
+
+    private CalendarResponse mapPostsCountsPerYear(List<Integer> years, List<PostsCountPerDate> postsCountPerDates) {
+        Map<String, Long> posts = new HashMap<>();
+        for (PostsCountPerDate item : postsCountPerDates) {
+            posts.put(item.getPostsDate(), item.getPostsCount());
+        }
+        CalendarResponse calendarResponse = new CalendarResponse();
+        calendarResponse.setYears(years);
+        calendarResponse.setPosts(posts);
+        return calendarResponse;
     }
 
     public static PostResponse map(List<PostUserCounts> postsAdditionalInfo) {
