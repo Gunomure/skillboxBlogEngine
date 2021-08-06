@@ -1,8 +1,8 @@
 package com.skillbox.blogengine.service;
 
+import com.skillbox.blogengine.dto.CalendarResponse;
 import com.skillbox.blogengine.dto.ModeType;
 import com.skillbox.blogengine.dto.PostResponse;
-import com.skillbox.blogengine.dto.CalendarResponse;
 import com.skillbox.blogengine.model.custom.PostUserCounts;
 import com.skillbox.blogengine.model.custom.PostsCountPerDate;
 import com.skillbox.blogengine.orm.PostRepository;
@@ -54,6 +54,16 @@ public class PostService {
     public PostResponse selectFilteredPostsByParameters(int offset, int limit, String query) {
         PageRequest pageRequest = PageRequest.of(offset, limit, Sort.by("timestamp").ascending());
         return map(postRepository.findPostsInfoPageable(query, pageRequest));
+    }
+
+    public PostResponse selectPostsByDate(int offset, int limit, String date) {
+        PageRequest pageRequest = PageRequest.of(offset, limit, Sort.by("timestamp").ascending());
+        return map(postRepository.findPostsInfoByDate(date, pageRequest));
+    }
+
+    public PostResponse selectPostsByTag(int offset, int limit, String tag) {
+        PageRequest pageRequest = PageRequest.of(offset, limit, Sort.by("timestamp").ascending());
+        return map(postRepository.findPostsInfoByTag(tag, pageRequest));
     }
 
     public long count() {

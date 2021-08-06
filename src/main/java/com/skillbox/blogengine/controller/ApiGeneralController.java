@@ -74,6 +74,22 @@ public class ApiGeneralController {
         return postService.selectFilteredPostsByParameters(offset, limit, query);
     }
 
+    @GetMapping("/post/byDate")
+    private PostResponse getPostsByDate(@RequestParam(defaultValue = "0") Integer offset,
+                                        @RequestParam(defaultValue = "10") Integer limit,
+                                        @RequestParam(defaultValue = "") String date) {
+        LOGGER.info("Get posts with parameters:\noffset = {}, limit = {}, query = {}", offset, limit, date);
+        return postService.selectPostsByDate(offset, limit, date);
+    }
+
+    @GetMapping("/post/byTag")
+    private PostResponse getPostsByTag(@RequestParam(defaultValue = "0") Integer offset,
+                                        @RequestParam(defaultValue = "10") Integer limit,
+                                        @RequestParam(defaultValue = "") String tag) {
+        LOGGER.info("Get posts with parameters:\noffset = {}, limit = {}, query = {}", offset, limit, tag);
+        return postService.selectPostsByTag(offset, limit, tag);
+    }
+
     @GetMapping("/tag")
     private TagResponse getTags(@RequestParam(defaultValue = "") String query) {
         return tagService.selectTagsStatistics(query);
