@@ -15,4 +15,9 @@ public interface TagRepository extends JpaRepository<Tag, Integer> {
             " WHERE lower(t.name) LIKE LOWER(CONCAT('%', :name, '%'))" +
             " group by t.name")
     List<TagUsageStatistics> findTagsByNameWithUsages(String name, Sort sort);
+
+    @Query("SELECT t.name FROM Tag t" +
+            " JOIN t.posts p" +
+            " WHERE p.id = :postId")
+    List<String> findTagsByPostId(int postId);
 }

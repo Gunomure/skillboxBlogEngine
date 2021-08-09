@@ -7,10 +7,7 @@ import com.skillbox.blogengine.service.TagService;
 import com.skillbox.blogengine.service.UserService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 
@@ -88,6 +85,13 @@ public class ApiGeneralController {
                                         @RequestParam(defaultValue = "") String tag) {
         LOGGER.info("Get posts with parameters:\noffset = {}, limit = {}, query = {}", offset, limit, tag);
         return postService.selectPostsByTag(offset, limit, tag);
+    }
+
+    @GetMapping("/post/{ID}")
+    private PostByIdResponse getPostsById(@PathVariable int ID) {
+        LOGGER.info("Get posts with parameters:\nid = {}", ID);
+//        return postService.selectPostsByTag(offset, limit, tag);
+        return postService.selectPostsById(ID);
     }
 
     @GetMapping("/tag")

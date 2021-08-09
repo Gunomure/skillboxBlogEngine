@@ -2,18 +2,17 @@ package com.skillbox.blogengine.orm;
 
 import com.skillbox.blogengine.model.Post;
 import com.skillbox.blogengine.model.custom.PostUserCounts;
+import com.skillbox.blogengine.model.custom.PostWithComments;
 import com.skillbox.blogengine.model.custom.PostsCountPerDate;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public interface PostRepository extends JpaRepository<Post, Integer>, JpaSpecificationExecutor<Post> {
+public interface PostRepository extends JpaRepository<Post, Integer> {
 
     @Query("SELECT new com.skillbox.blogengine.model.custom.PostUserCounts(p.id AS id" +
             "     , UNIX_TIMESTAMP(p.time)            AS timestamp" +
@@ -74,7 +73,24 @@ public interface PostRepository extends JpaRepository<Post, Integer>, JpaSpecifi
             " GROUP BY p.id, pc.post, pv.post")
     List<PostUserCounts> findPostsInfoByTag(String tag, Pageable pageable);
 
-
+    @Query("SELECT new com.skillbox.blogengine.model.custom.PostWithComments(p.id AS id" +
+            "     , UNIX_TIMESTAMP(p.time)            AS timestamp" +
+            "     , p.isActive                        AS active" +
+            "     , a.id                              AS userId" +
+            "     , a.name                            AS userName" +
+            "     , p.title                           AS title" +
+            "     , p.text                            AS text" +
+            "     , COUNT(CASE pv.value WHEN 1 THEN 1 ELSE NULL END)  AS likeCount" +
+            "     , COUNT(CASE pv.value WHEN -1 THEN 1 ELSE NULL END) AS dislikeCount" +
+            "     , p.viewCount                       AS viewCount)" +
+            " FROM Post p" +
+            " LEFT JOIN p.comments pc" +
+            " LEFT JOIN p.author a" +
+            " LEFT JOIN p.postVotes pv" +
+            " WHERE p.isActive = TRUE AND p.moderationStatus = 'ACCEPTED' AND now() >= p.time" +
+            "     AND p.id = :id" +
+            " GROUP BY p.id, pc.post, pv.post")
+    PostWithComments findPostInfoById(int id);
 
     @Query("SELECT new com.skillbox.blogengine.model.custom.PostsCountPerDate(DATE_FORMAT(p.time,'%Y-%m-%d') AS postsDate" +
             ", COUNT(p.id) AS postsCount) FROM Post p" +
@@ -82,8 +98,10 @@ public interface PostRepository extends JpaRepository<Post, Integer>, JpaSpecifi
             " GROUP BY DATE_FORMAT(p.time,'%Y-%m-%d')")
     List<PostsCountPerDate> findPostsCountPerDateByYear(int year);
 
+    Post findPostById(int id);
+    Post save(Post post);
+
     // TODO возможно есть вариант без кастомного Query
     @Query("SELECT DISTINCT year(p.time) FROM Post p")
     List<Integer> findDistinctYears();
-
 }
