@@ -52,11 +52,11 @@ public class PostService {
                 pageRequest = PageRequest.of(offset, limit, Sort.by("likeCount").descending());
                 break;
             case early:
-                pageRequest = PageRequest.of(offset, limit, Sort.by("timestamp").descending());
+                pageRequest = PageRequest.of(offset, limit, Sort.by("timestamp").ascending());
                 break;
             default:
 //                 recent тоже считается дефолтным
-                pageRequest = PageRequest.of(offset, limit, Sort.by("timestamp").ascending());
+                pageRequest = PageRequest.of(offset, limit, Sort.by("timestamp").descending());
                 break;
         }
 

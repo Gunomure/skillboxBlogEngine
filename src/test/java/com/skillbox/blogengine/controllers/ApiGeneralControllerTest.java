@@ -21,6 +21,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class ApiGeneralControllerTest extends AbstractIntegrationTest {
 
+    private static final String LONG_POST_TEXT = "post text 4aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...";
+
     @Test
     void getInitTest() throws Exception {
         InitResponse initResponse = new InitResponse();
@@ -66,12 +68,12 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
     @Test
     void getPostsInitParametersTest() throws Exception {
         List<PostResponse.PostInfo> posts = new ArrayList<>();
-        posts.add(new PostResponse.PostInfo(4, 1,
-                new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 4", "post text 4...", 0, 0, 0, 1000));
-        posts.add(new PostResponse.PostInfo(3, 1,
-                new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 3", "post text 3...", 2, 1, 0, 100));
-        posts.add(new PostResponse.PostInfo(2, 1,
+        posts.add(new PostResponse.PostInfo(2, 1612170000,
                 new PostResponse.PostInfo.UserInfo(1, "user_name1"), "title 2", "post text 2...", 0, 0, 1, 10));
+        posts.add(new PostResponse.PostInfo(3, 1609491600,
+                new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 3", "post text 3...", 2, 1, 0, 100));
+        posts.add(new PostResponse.PostInfo(4, 1588280400,
+                new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 4", LONG_POST_TEXT, 0, 0, 0, 1000));
 
         PostResponse postResponse = new PostResponse();
         postResponse.setPosts(posts);
@@ -96,12 +98,12 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
     @Test
     void getPostsSortedPopularTest() throws Exception {
         List<PostResponse.PostInfo> posts = new ArrayList<>();
-        posts.add(new PostResponse.PostInfo(2, 1,
+        posts.add(new PostResponse.PostInfo(2, 1612170000,
                 new PostResponse.PostInfo.UserInfo(1, "user_name1"), "title 2", "post text 2...", 0, 0, 1, 10));
-        posts.add(new PostResponse.PostInfo(3, 1,
+        posts.add(new PostResponse.PostInfo(3, 1609491600,
                 new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 3", "post text 3...", 2, 1, 0, 100));
-        posts.add(new PostResponse.PostInfo(4, 1,
-                new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 4", "post text 4...", 0, 0, 0, 1000));
+        posts.add(new PostResponse.PostInfo(4, 1588280400,
+                new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 4", LONG_POST_TEXT, 0, 0, 0, 1000));
 
         PostResponse postResponse = new PostResponse();
         postResponse.setPosts(posts);
@@ -125,12 +127,12 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
     @Test
     void getPostsSortedBestTest() throws Exception {
         List<PostResponse.PostInfo> posts = new ArrayList<>();
-        posts.add(new PostResponse.PostInfo(3, 1,
+        posts.add(new PostResponse.PostInfo(3, 1609491600,
                 new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 3", "post text 3...", 2, 1, 0, 100));
-        posts.add(new PostResponse.PostInfo(2, 1,
+        posts.add(new PostResponse.PostInfo(2, 1612170000,
                 new PostResponse.PostInfo.UserInfo(1, "user_name1"), "title 2", "post text 2...", 0, 0, 1, 10));
-        posts.add(new PostResponse.PostInfo(4, 1,
-                new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 4", "post text 4...", 0, 0, 0, 1000));
+        posts.add(new PostResponse.PostInfo(4, 1588280400,
+                new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 4", LONG_POST_TEXT, 0, 0, 0, 1000));
 
         PostResponse postResponse = new PostResponse();
         postResponse.setPosts(posts);
@@ -154,12 +156,12 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
     @Test
     void getPostsSortedEarlyTest() throws Exception {
         List<PostResponse.PostInfo> posts = new ArrayList<>();
-        posts.add(new PostResponse.PostInfo(2, 1,
-                new PostResponse.PostInfo.UserInfo(1, "user_name1"), "title 2", "post text 2...", 0, 0, 1, 10));
-        posts.add(new PostResponse.PostInfo(3, 1,
+        posts.add(new PostResponse.PostInfo(4, 1588280400,
+                new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 4", LONG_POST_TEXT, 0, 0, 0, 1000));
+        posts.add(new PostResponse.PostInfo(3, 1609491600,
                 new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 3", "post text 3...", 2, 1, 0, 100));
-        posts.add(new PostResponse.PostInfo(4, 1,
-                new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 4", "post text 4...", 0, 0, 0, 1000));
+        posts.add(new PostResponse.PostInfo(2, 1612170000,
+                new PostResponse.PostInfo.UserInfo(1, "user_name1"), "title 2", "post text 2...", 0, 0, 1, 10));
 
         PostResponse postResponse = new PostResponse();
         postResponse.setPosts(posts);
@@ -183,12 +185,12 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
     @Test
     void getPostsDefaultParametersTest() throws Exception {
         List<PostResponse.PostInfo> posts = new ArrayList<>();
-        posts.add(new PostResponse.PostInfo(4, 1,
-                new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 4", "post text 4...", 0, 0, 0, 1000));
-        posts.add(new PostResponse.PostInfo(3, 1,
-                new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 3", "post text 3...", 2, 1, 0, 100));
-        posts.add(new PostResponse.PostInfo(2, 1,
+        posts.add(new PostResponse.PostInfo(2, 1612170000,
                 new PostResponse.PostInfo.UserInfo(1, "user_name1"), "title 2", "post text 2...", 0, 0, 1, 10));
+        posts.add(new PostResponse.PostInfo(3, 1609491600,
+                new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 3", "post text 3...", 2, 1, 0, 100));
+        posts.add(new PostResponse.PostInfo(4, 1588280400,
+                new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 4", LONG_POST_TEXT, 0, 0, 0, 1000));
 
         PostResponse postResponse = new PostResponse();
         postResponse.setPosts(posts);
@@ -212,8 +214,8 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
     @Test
     void getPostsCustomOffsetTest() throws Exception {
         List<PostResponse.PostInfo> posts = new ArrayList<>();
-        posts.add(new PostResponse.PostInfo(2, 1,
-                new PostResponse.PostInfo.UserInfo(1, "user_name1"), "title 2", "post text 2...", 0, 0, 1, 10));
+        posts.add(new PostResponse.PostInfo(4, 1588280400,
+                new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 4", LONG_POST_TEXT, 0, 0, 0, 1000));
 
         PostResponse postResponse = new PostResponse();
         postResponse.setPosts(posts);
@@ -237,8 +239,8 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
     @Test
     void getPostsCustomLimitTest() throws Exception {
         List<PostResponse.PostInfo> posts = new ArrayList<>();
-        posts.add(new PostResponse.PostInfo(4, 1,
-                new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 4", "post text 4...", 0, 0, 0, 1000));
+        posts.add(new PostResponse.PostInfo(2, 1612170000,
+                new PostResponse.PostInfo.UserInfo(1, "user_name1"), "title 2", "post text 2...", 0, 0, 1, 10));
 
         PostResponse postResponse = new PostResponse();
         postResponse.setPosts(posts);
@@ -333,11 +335,11 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
     @Test
     void getPostsSearchWithoutParametersTest() throws Exception {
         List<PostResponse.PostInfo> posts = new ArrayList<>();
-        posts.add(new PostResponse.PostInfo(4, 1,
-                new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 4", "post text 4...", 0, 0, 0, 1000));
-        posts.add(new PostResponse.PostInfo(3, 1,
+        posts.add(new PostResponse.PostInfo(4, 1588280400,
+                new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 4", LONG_POST_TEXT, 0, 0, 0, 1000));
+        posts.add(new PostResponse.PostInfo(3, 1609491600,
                 new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 3", "post text 3...", 2, 1, 0, 100));
-        posts.add(new PostResponse.PostInfo(2, 1,
+        posts.add(new PostResponse.PostInfo(2, 1612170000,
                 new PostResponse.PostInfo.UserInfo(1, "user_name1"), "title 2", "post text 2...", 0, 0, 1, 10));
 
         PostResponse postResponse = new PostResponse();
@@ -359,11 +361,11 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
     @Test
     void getPostsSearchWithEmptyQueryTest() throws Exception {
         List<PostResponse.PostInfo> posts = new ArrayList<>();
-        posts.add(new PostResponse.PostInfo(4, 1,
-                new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 4", "post text 4...", 0, 0, 0, 1000));
-        posts.add(new PostResponse.PostInfo(3, 1,
+        posts.add(new PostResponse.PostInfo(4, 1588280400,
+                new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 4", LONG_POST_TEXT, 0, 0, 0, 1000));
+        posts.add(new PostResponse.PostInfo(3, 1609491600,
                 new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 3", "post text 3...", 2, 1, 0, 100));
-        posts.add(new PostResponse.PostInfo(2, 1,
+        posts.add(new PostResponse.PostInfo(2, 1612170000,
                 new PostResponse.PostInfo.UserInfo(1, "user_name1"), "title 2", "post text 2...", 0, 0, 1, 10));
 
         PostResponse postResponse = new PostResponse();
@@ -388,7 +390,7 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
     @Test
     void getPostsSearchWithCustomQueryTest() throws Exception {
         List<PostResponse.PostInfo> posts = new ArrayList<>();
-        posts.add(new PostResponse.PostInfo(3, 1,
+        posts.add(new PostResponse.PostInfo(3, 1609491600,
                 new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 3", "post text 3...", 2, 1, 0, 100));
 
         PostResponse postResponse = new PostResponse();
