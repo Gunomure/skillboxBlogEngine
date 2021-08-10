@@ -1,12 +1,10 @@
 package com.skillbox.blogengine.controller;
 
 import com.skillbox.blogengine.dto.*;
-import com.skillbox.blogengine.service.GlobalSettingsService;
-import com.skillbox.blogengine.service.PostService;
-import com.skillbox.blogengine.service.TagService;
-import com.skillbox.blogengine.service.UserService;
+import com.skillbox.blogengine.service.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -21,13 +19,17 @@ public class ApiGeneralController {
     private UserService userService;
     private PostService postService;
     private TagService tagService;
+    private CaptchaService captchaService;
+    private RegisterService registerService;
 
-    public ApiGeneralController(InitResponse initResponse, GlobalSettingsService settingsService, UserService userService, PostService postService, TagService tagService) {
+    public ApiGeneralController(InitResponse initResponse, GlobalSettingsService settingsService, UserService userService, PostService postService, TagService tagService, CaptchaService captchaService, RegisterService registerService) {
         this.initResponse = initResponse;
         this.settingsService = settingsService;
         this.userService = userService;
         this.postService = postService;
         this.tagService = tagService;
+        this.captchaService = captchaService;
+        this.registerService = registerService;
     }
 
     @GetMapping("/init")
@@ -107,5 +109,16 @@ public class ApiGeneralController {
         }
 
         return postService.selectPostsCountsByYear(year);
+    }
+
+    @GetMapping("/auth/captcha")
+    private CaptchaResponse getCaptcha() {
+        captchaService.deleteExpiredCaptcha();
+        return captchaService.createAndSaveCaptcha();
+    }
+
+    @PostMapping("/auth/register")
+    private RegisterResponse postRegister(@RequestBody UserRegisterData userRegisterData) {
+        return registerService.registerUser(userRegisterData);
     }
 }
