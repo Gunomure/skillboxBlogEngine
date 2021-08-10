@@ -1,5 +1,6 @@
 package com.skillbox.blogengine.service;
 
+import com.skillbox.blogengine.controller.exception.EntityNotFoundException;
 import com.skillbox.blogengine.dto.CalendarResponse;
 import com.skillbox.blogengine.dto.ModeType;
 import com.skillbox.blogengine.dto.PostByIdResponse;
@@ -91,7 +92,7 @@ public class PostService {
             postById.setViewCount(postById.getViewCount() + 1);
             postRepository.save(postById);
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found");
+            throw new EntityNotFoundException("Document not found");
         }
         return mapToPostByIdResponse(postInfoById, commentsByPostId, tagsByPostId);
     }

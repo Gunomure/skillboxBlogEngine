@@ -1,25 +1,30 @@
 package com.skillbox.blogengine.controllers;
 
-import com.skillbox.blogengine.dto.InitResponse;
-import com.skillbox.blogengine.dto.NotAuthorizedUser;
-import com.skillbox.blogengine.dto.PostResponse;
-import com.skillbox.blogengine.dto.TagResponse;
+import com.skillbox.blogengine.controller.exception.EntityNotFoundException;
+import com.skillbox.blogengine.dto.*;
+import com.skillbox.blogengine.model.CaptchaCode;
+import com.skillbox.blogengine.orm.CaptchaRepository;
+import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.Customization;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.skyscreamer.jsonassert.comparator.CustomComparator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 public class ApiGeneralControllerTest extends AbstractIntegrationTest {
+    @Autowired
+    CaptchaRepository captchaRepository;
 
     private static final String LONG_POST_TEXT = "post text 4aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...";
 
@@ -374,7 +379,7 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
         String expectedResponse = mapper.writeValueAsString(postResponse);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/post/search")
-                        .contentType(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
                 .param("offset", "0")
                 .param("limit", "10")
                 .param("query", "")
@@ -412,10 +417,231 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
                         new Customization("posts[*].timestamp", (o1, o2) -> true)));
     }
 
+    @Test
+    void getCalendarFor2020YearTest() throws Exception {
+        CalendarResponse calendarResponse = new CalendarResponse();
+        List<Integer> years = Arrays.asList(2021, 2020);
+        Map<String, Long> posts = new HashMap<>();
+        posts.put("2020-05-01", 1L);
+        calendarResponse.setYears(years);
+        calendarResponse.setPosts(posts);
+        String expectedResponse = mapper.writeValueAsString(calendarResponse);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/calendar")
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("year", "2020")
+        ).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedResponse));
+    }
+
+    @Test
+    void getPostsByDateWithEmptyParametersTest() throws Exception {
+        List<PostResponse.PostInfo> posts = new ArrayList<>();
+        PostResponse postResponse = new PostResponse();
+        postResponse.setPosts(posts);
+        postResponse.setCount(0);
+        String expectedResponse = mapper.writeValueAsString(postResponse);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/post/byDate")
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedResponse));
+    }
+
+    @Test
+    void getPostsByDateFor20210201Test() throws Exception {
+        List<PostResponse.PostInfo> posts = new ArrayList<>();
+        posts.add(new PostResponse.PostInfo(2, 1612170000,
+                new PostResponse.PostInfo.UserInfo(1, "user_name1"), "title 2", "post text 2...", 0, 0, 1, 10));
+
+        PostResponse postResponse = new PostResponse();
+        postResponse.setPosts(posts);
+        postResponse.setCount(1);
+        String expectedResponse = mapper.writeValueAsString(postResponse);
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/post/byDate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("offset", "0")
+                .param("limit", "10")
+                .param("date", "2021-02-01")
+        ).andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+
+        // игнорируем поле timestamp, так как оно может меняться в зависимости от времени запуска миграции
+        JSONAssert.assertEquals(expectedResponse, mvcResult.getResponse().getContentAsString(),
+                new CustomComparator(JSONCompareMode.STRICT,
+                        new Customization("posts[*].timestamp", (o1, o2) -> true)));
+    }
+
+    @Test
+    @Ignore("Не понятно, что должен вернуть метод, если не передали тэг: пустой список постов или посты для всех тэгов")
+    void getPostsByTagWithEmptyParametersTest() throws Exception {
+        List<PostResponse.PostInfo> posts = new ArrayList<>();
+        posts.add(new PostResponse.PostInfo(3, 1609491600,
+                new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 3", "post text 3...", 2, 1, 0, 100));
+
+        PostResponse postResponse = new PostResponse();
+        postResponse.setPosts(posts);
+        postResponse.setCount(1);
+        String expectedResponse = mapper.writeValueAsString(postResponse);
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/post/byTag")
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+
+        // игнорируем поле timestamp, так как оно может меняться в зависимости от времени запуска миграции
+        JSONAssert.assertEquals(expectedResponse, mvcResult.getResponse().getContentAsString(),
+                new CustomComparator(JSONCompareMode.STRICT,
+                        new Customization("posts[*].timestamp", (o1, o2) -> true)));
+    }
+
+    @Test
+    void getPostsByTagForTag2Test() throws Exception {
+        List<PostResponse.PostInfo> posts = new ArrayList<>();
+        posts.add(new PostResponse.PostInfo(3, 1609491600,
+                new PostResponse.PostInfo.UserInfo(2, "user_name2"), "title 3", "post text 3...", 2, 1, 0, 100));
+
+        PostResponse postResponse = new PostResponse();
+        postResponse.setPosts(posts);
+        postResponse.setCount(1);
+        String expectedResponse = mapper.writeValueAsString(postResponse);
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/post/byTag")
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("offset", "0")
+                .param("limit", "10")
+                .param("tag", "tag2")
+        ).andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+
+        // игнорируем поле timestamp, так как оно может меняться в зависимости от времени запуска миграции
+        JSONAssert.assertEquals(expectedResponse, mvcResult.getResponse().getContentAsString(),
+                new CustomComparator(JSONCompareMode.STRICT,
+                        new Customization("posts[*].timestamp", (o1, o2) -> true)));
+    }
+
+    @Test
+    void getPostsByWrongIdTest() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/post/1")
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof EntityNotFoundException))
+                .andExpect(result -> assertEquals("Document not found", result.getResolvedException().getMessage()));
+    }
+
+    @Test
+    void getPostsByIdTest() throws Exception {
+        PostByIdResponse postByIdResponse = new PostByIdResponse();
+        postByIdResponse.setId(2);
+        postByIdResponse.setTimestamp(1612180800);
+        postByIdResponse.setActive(true);
+        postByIdResponse.setUser(new PostByIdResponse.PostUser(1, "user_name1"));
+        postByIdResponse.setTitle("title 2");
+        postByIdResponse.setText("post text 2");
+        postByIdResponse.setLikeCount(0);
+        postByIdResponse.setDislikeCount(0);
+        postByIdResponse.setViewCount(10);
+        PostByIdResponse.Comment comment = new PostByIdResponse.Comment(3,
+                1628637087,
+                "comment text 3",
+                new PostByIdResponse.CommentUser(2, "user_name2", "some link1"));
+        postByIdResponse.setComments(Arrays.asList(comment));
+        postByIdResponse.setTags(Arrays.asList("tag1"));
+        String expectedResponse = mapper.writeValueAsString(postByIdResponse);
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/post/2")
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+
+        // проверяем, что при вызове апи количество просмотров увеличилось
+        postByIdResponse.setViewCount(postByIdResponse.getViewCount() + 1);
+        String expectedResponse2 = mapper.writeValueAsString(postByIdResponse);
+        MvcResult mvcResult2 = mockMvc.perform(MockMvcRequestBuilders.get("/api/post/2")
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+
+        // игнорируем поле timestamp, так как оно может меняться в зависимости от времени запуска миграции
+        JSONAssert.assertEquals(expectedResponse, mvcResult.getResponse().getContentAsString(),
+                new CustomComparator(JSONCompareMode.STRICT,
+                        new Customization("comments[*].timestamp", (o1, o2) -> true)));
+
+        JSONAssert.assertEquals(expectedResponse2, mvcResult2.getResponse().getContentAsString(),
+                new CustomComparator(JSONCompareMode.STRICT,
+                        new Customization("comments[*].timestamp", (o1, o2) -> true)));
+    }
+
+    @Test
+    void getCaptchaTest() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/auth/captcha")
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$['secret']").isNotEmpty())
+                .andExpect(jsonPath("$['image']").isNotEmpty());
+    }
+
+    @Test
+    void postAuthRegisterTest() throws Exception {
+        MvcResult mvcResultCaptcha = mockMvc.perform(MockMvcRequestBuilders.get("/api/auth/captcha")
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+        String contentAsString = mvcResultCaptcha.getResponse().getContentAsString();
+        CaptchaResponse captchaResponse = mapper.readValue(contentAsString, CaptchaResponse.class);
+        System.out.println(captchaResponse.getSecret());
+        System.out.println(captchaResponse.getImage());
+        CaptchaCode captchaCodeBySecretCode = captchaRepository.findCaptchaCodeBySecretCode(captchaResponse.getSecret());
+        System.out.println(captchaCodeBySecretCode.getCode());
+
+        UserRegisterData registerData = new UserRegisterData("email@email.ru",
+                "qweqwe",
+                "dtyunyaev",
+                captchaCodeBySecretCode.getCode(),
+                captchaResponse.getSecret());
+
+        RegisterResponse registerResponse = new RegisterResponse(true);
+
+        Map<String, String> errors = new HashMap<>();
+        errors.put("email", "Этот e-mail уже зарегистрирован");
+        RegisterErrorResponse registerErrorResponse = new RegisterErrorResponse();
+        registerErrorResponse.setResult(false);
+        registerErrorResponse.setErrors(errors);
+
+        String registrationContent = mapper.writeValueAsString(registerData);
+
+        String expectedResponse = mapper.writeValueAsString(registerResponse);
+        String expectedErrorResponse = mapper.writeValueAsString(registerErrorResponse);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(registrationContent)
+        ).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedResponse));
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(registrationContent)
+        ).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedErrorResponse));
+    }
+
     /**
      * TODO добавить тесты на проверку:
      *
-     * 1 строка announce обрезается до 150 символов
      * 2 из строки announce удаляются html тэги
      */
 }
