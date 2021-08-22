@@ -5,6 +5,7 @@ import lombok.Data;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Data
 @Entity
@@ -31,4 +32,28 @@ public class PostVote {
     @ManyToOne
     @JoinColumn(name = "post_id", columnDefinition = "INT NOT NULL COMMENT 'пост, которому поставлен лайк / дизлайк'")
     private Post post;
+
+    @Override
+    public String toString() {
+        return "PostVote{" +
+                "id=" + id +
+                ", time=" + time +
+                ", value=" + value +
+                ", user=" + user.getId() +
+                ", post=" + post.getId() +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PostVote postVote = (PostVote) o;
+        return id == postVote.id && value == postVote.value && Objects.equals(time, postVote.time);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, time, value);
+    }
 }

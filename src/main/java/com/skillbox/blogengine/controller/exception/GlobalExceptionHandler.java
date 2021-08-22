@@ -18,6 +18,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         errors.setTimestamp(LocalDateTime.now());
         errors.setError(ex.getMessage());
         errors.setStatus(HttpStatus.NOT_FOUND.value());
+        errors.setResult(false);
 
         return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
     }

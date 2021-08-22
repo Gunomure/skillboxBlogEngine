@@ -4,6 +4,7 @@ import com.skillbox.blogengine.dto.*;
 import com.skillbox.blogengine.service.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,22 +40,9 @@ public class ApiGeneralController {
     }
 
     @GetMapping("/settings")
+//    @PreAuthorize("hasAnyAuthority('user:write')")
     private GlobalSettingsResponse settings() {
         return settingsService.selectAll();
-    }
-
-    @GetMapping("/auth/check")
-    private UserResponse checkAuth() {
-        // TODO раскоментить когда будет авторизация
-//        try {
-//            User user = userService.getById(1);
-//            AuthorizedUser authorizedUser = new AuthorizedUser();
-//            return authorizedUser.map(user);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-
-        return new NotAuthorizedUser();
     }
 
     @GetMapping("/post")
@@ -90,6 +78,7 @@ public class ApiGeneralController {
     }
 
     @GetMapping("/post/{ID}")
+//    @PreAuthorize("hasAnyAuthority('user:write')")
     private PostByIdResponse getPostsById(@PathVariable int ID) {
         LOGGER.info("Get posts with parameters:\nid = {}", ID);
 //        return postService.selectPostsByTag(offset, limit, tag);

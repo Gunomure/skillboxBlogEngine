@@ -1,5 +1,6 @@
 package com.skillbox.blogengine.service;
 
+import com.skillbox.blogengine.controller.exception.EntityNotFoundException;
 import com.skillbox.blogengine.dto.RegisterErrorResponse;
 import com.skillbox.blogengine.dto.RegisterResponse;
 import com.skillbox.blogengine.dto.UserRegisterData;
@@ -27,7 +28,8 @@ public class RegisterService {
     }
 
     public RegisterResponse registerUser(UserRegisterData user) {
-        User userByEmail = userRepository.findUserByEmail(user.getEmail());
+        User userByEmail = userRepository.findByEmail(user.getEmail())
+                .orElseThrow(() -> new EntityNotFoundException(""));
         CaptchaCode captchaCodeBySecretCode = captchaRepository.findCaptchaCodeBySecretCode(user.getCaptchaSecret());
         if (userByEmail == null
                 && captchaCodeBySecretCode != null

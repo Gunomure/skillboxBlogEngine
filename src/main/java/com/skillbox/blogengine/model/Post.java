@@ -60,19 +60,6 @@ public class Post {
     private Set<PostVote> postVotes;
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Post post = (Post) o;
-        return id == post.id && isActive == post.isActive && viewCount == post.viewCount && moderationStatus == post.moderationStatus && Objects.equals(moderator, post.moderator) && author.equals(post.author) && time.equals(post.time) && title.equals(post.title) && text.equals(post.text) && tagToPost.equals(post.tagToPost) && postVotes.equals(post.postVotes);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, isActive, moderationStatus, moderator, author, time, title, text, viewCount, tagToPost, postVotes);
-    }
-
-    @Override
     public String toString() {
         return "Post{" +
                 "id=" + id +
@@ -84,8 +71,21 @@ public class Post {
                 ", title='" + title + '\'' +
                 ", text='" + text + '\'' +
                 ", viewCount=" + viewCount +
-                ", tags=" + tagToPost +
-                ", postVotes=" + postVotes +
+                ", tags=" + tagToPost.size() +
+                ", postVotes=" + postVotes.size() +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Post post = (Post) o;
+        return id == post.id && isActive == post.isActive && viewCount == post.viewCount && moderationStatus == post.moderationStatus && Objects.equals(moderator, post.moderator) && author.equals(post.author) && time.equals(post.time) && title.equals(post.title) && text.equals(post.text) && Objects.equals(comments.size(), post.comments.size()) && Objects.equals(tagToPost.size(), post.tagToPost.size()) && Objects.equals(postVotes.size(), post.postVotes.size());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, isActive, moderationStatus, moderator, author, time, title, text, viewCount, comments.size(), tagToPost.size(), postVotes.size());
     }
 }
