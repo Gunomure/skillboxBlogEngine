@@ -14,6 +14,7 @@ import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class RegisterService {
@@ -28,10 +29,9 @@ public class RegisterService {
     }
 
     public RegisterResponse registerUser(UserRegisterData user) {
-        User userByEmail = userRepository.findByEmail(user.getEmail())
-                .orElseThrow(() -> new EntityNotFoundException(""));
+        Optional<User> userByEmail = userRepository.findByEmail(user.getEmail());
         CaptchaCode captchaCodeBySecretCode = captchaRepository.findCaptchaCodeBySecretCode(user.getCaptchaSecret());
-        if (userByEmail == null
+        if (!userByEmail.isPresent()
                 && captchaCodeBySecretCode != null
                 && captchaCodeBySecretCode.getCode().equals(user.getCaptcha())
                 && user.getPassword().length() >= 6
@@ -48,7 +48,7 @@ public class RegisterService {
             LOGGER.info("User's registration data is invalid. Return error");
             RegisterErrorResponse registerResponse = new RegisterErrorResponse();
             registerResponse.setResult(false);
-            if (userByEmail != null) {
+            if (userByEmail.isPresent()) {
                 registerResponse.addError("email", "Этот e-mail уже зарегистрирован");
             }
             if (captchaCodeBySecretCode == null || !captchaCodeBySecretCode.getCode().equals(user.getCaptcha())) {

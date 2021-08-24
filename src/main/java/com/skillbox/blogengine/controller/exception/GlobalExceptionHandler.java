@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
@@ -18,9 +20,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         errors.setTimestamp(LocalDateTime.now());
         errors.setError(ex.getMessage());
         errors.setStatus(HttpStatus.NOT_FOUND.value());
-        errors.setResult(false);
 
         return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(UserNotAuthorizedException.class)
+    protected ResponseEntity<Map<String, Boolean>> handleUserNotAuthorizedException(Exception ex) {
+        Map<String, Boolean> result = new HashMap<>();
+        result.put("result", false);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @ExceptionHandler(BadRequestException.class)

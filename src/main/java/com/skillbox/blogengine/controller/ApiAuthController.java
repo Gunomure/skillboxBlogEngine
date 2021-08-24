@@ -1,9 +1,9 @@
 package com.skillbox.blogengine.controller;
 
-import com.skillbox.blogengine.controller.exception.EntityNotFoundException;
+import com.skillbox.blogengine.controller.exception.UserNotAuthorizedException;
 import com.skillbox.blogengine.dto.*;
-import com.skillbox.blogengine.model.User;
-import com.skillbox.blogengine.orm.UserRepository;
+import com.skillbox.blogengine.service.CaptchaService;
+import com.skillbox.blogengine.service.RegisterService;
 import com.skillbox.blogengine.service.UserService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,54 +14,60 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
 public class ApiAuthController {
     private final static Logger LOGGER = LogManager.getLogger(ApiAuthController.class);
 
-    private final AuthenticationManager authenticationManager;
     private final UserService userService;
-    private final UserRepository userRepository;
+    private final CaptchaService captchaService;
+    private final RegisterService registerService;
 
-    public ApiAuthController(AuthenticationManager authenticationManager, UserService userService, UserRepository userRepository) {
-        this.authenticationManager = authenticationManager;
+    public ApiAuthController(UserService userService, CaptchaService captchaService, RegisterService registerService) {
         this.userService = userService;
-        this.userRepository = userRepository;
+        this.captchaService = captchaService;
+        this.registerService = registerService;
     }
 
     @PostMapping("/login")
-    public UserResponse login(@RequestBody LoginData loginData) {
-        Optional<User> byEmail = userRepository.findByEmail("test2@mail.ru");
-        LOGGER.info("!!!login user name: {}", byEmail.get().getName());
-        LOGGER.info("!!!login user name: {}", byEmail.get().getPassword());
-
-        LOGGER.info("login user name: {}", loginData.getEmail());
-        LOGGER.info("login user name: {}", loginData.getPassword());
+    public LoggedUserResponse login(@RequestBody LoginData loginData) {
         Authentication auth = new UsernamePasswordAuthenticationToken(loginData.getEmail(), loginData.getPassword());
         SecurityContextHolder.getContext().setAuthentication(auth);
-        String userName = auth.getName();
-        LOGGER.info("logged user name: {}", userName);
 
         return userService.getByEmail(auth.getName());
     }
 
-    @GetMapping("/auth/check")
-    private UserResponse checkAuth(Principal principal) {
+    @GetMapping("/check")
+    public LoggedUserResponse checkAuth(Principal principal) {
         if (principal == null) {
-            throw new EntityNotFoundException("User not found");
+            throw new UserNotAuthorizedException("User not found");
         } else {
             return userService.getByEmail(principal.getName());
         }
-//        try {
-//            User user = userService.getById(1);
-//            AuthorizedUser authorizedUser = new AuthorizedUser();
-//            return authorizedUser.map(user);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+    }
 
-//        return new NotAuthorizedUser();
+    @GetMapping("/logout")
+    public Map<String, Boolean> logout(Principal principal) {
+        if (principal != null) {
+            SecurityContextHolder.clearContext();
+        }
+        Map<String, Boolean> result = new HashMap<>();
+        result.put("result", true);
+
+        return result;
+    }
+
+    @GetMapping("/captcha")
+    public CaptchaResponse getCaptcha() {
+        captchaService.deleteExpiredCaptcha();
+        return captchaService.createAndSaveCaptcha();
+    }
+
+    @PostMapping("/register")
+    public RegisterResponse postRegister(@RequestBody UserRegisterData userRegisterData) {
+        return registerService.registerUser(userRegisterData);
     }
 }

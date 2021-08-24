@@ -1,19 +1,21 @@
 package com.skillbox.blogengine.service;
 
 import com.skillbox.blogengine.controller.exception.EntityNotFoundException;
-import com.skillbox.blogengine.dto.AuthorizedUser;
+import com.skillbox.blogengine.dto.LoggedUserResponse;
 import com.skillbox.blogengine.model.ModerationStatus;
 import com.skillbox.blogengine.model.Post;
 import com.skillbox.blogengine.model.User;
 import com.skillbox.blogengine.orm.UserRepository;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 @Service
+@Transactional
 public class UserService {
 
     private final static Logger LOGGER = Logger.getLogger(UserService.class);
@@ -32,14 +34,15 @@ public class UserService {
                 () -> new EntityNotFoundException(String.format("Wrong index: %d", id)));
     }
 
-    public AuthorizedUser getByEmail(String email) {
+    public LoggedUserResponse getByEmail(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException(""));
+                .orElseThrow(() -> new EntityNotFoundException("User " + email + " not found"));
         return map(user);
     }
 
-    public AuthorizedUser map(User user) {
-        AuthorizedUser userResponse = new AuthorizedUser();
+    public LoggedUserResponse map(User user) {
+        LoggedUserResponse userResponse = new LoggedUserResponse();
+        userResponse.setResult(true);
         userResponse.setId(user.getId());
         userResponse.setName(user.getName());
         userResponse.setPhoto(user.getPhoto());
