@@ -39,7 +39,6 @@ public class ApiGeneralController {
     }
 
     @GetMapping("/settings")
-//    @PreAuthorize("hasAuthority('user:write')")
     public GlobalSettingsResponse settings() {
         return settingsService.selectAll();
     }

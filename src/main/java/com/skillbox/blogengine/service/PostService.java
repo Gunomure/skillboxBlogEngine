@@ -1,10 +1,7 @@
 package com.skillbox.blogengine.service;
 
 import com.skillbox.blogengine.controller.exception.EntityNotFoundException;
-import com.skillbox.blogengine.dto.CalendarResponse;
-import com.skillbox.blogengine.dto.ModeType;
-import com.skillbox.blogengine.dto.PostByIdResponse;
-import com.skillbox.blogengine.dto.PostResponse;
+import com.skillbox.blogengine.dto.*;
 import com.skillbox.blogengine.model.Post;
 import com.skillbox.blogengine.model.custom.CommentUserInfo;
 import com.skillbox.blogengine.model.custom.PostUserCounts;
@@ -93,6 +90,27 @@ public class PostService {
             throw new EntityNotFoundException("Document not found");
         }
         return mapToPostByIdResponse(postInfoById, commentsByPostId, tagsByPostId);
+    }
+
+    public PostResponse selectMyPosts(int userId, int offset, int limit, PostStatus status) {
+        PostResponse response = new PostResponse();
+        PageRequest pageRequest = PageRequest.of(offset, limit);
+        switch (status) {
+            case inactive:
+                response = mapToPostResponse(postRepository.findInactivePosts(userId, pageRequest));
+                break;
+            case pending:
+                response = mapToPostResponse(postRepository.findPendingPosts(userId, pageRequest));
+                break;
+            case declined:
+                response = mapToPostResponse(postRepository.findDeclinedPosts(userId, pageRequest));
+                break;
+            case published:
+                response = mapToPostResponse(postRepository.findPublishedPosts(userId, pageRequest));
+                break;
+        }
+
+        return response;
     }
 
     public long count() {

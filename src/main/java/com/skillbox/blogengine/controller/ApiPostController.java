@@ -1,12 +1,14 @@
 package com.skillbox.blogengine.controller;
 
-import com.skillbox.blogengine.dto.ModeType;
-import com.skillbox.blogengine.dto.PostByIdResponse;
-import com.skillbox.blogengine.dto.PostResponse;
+import com.skillbox.blogengine.dto.*;
 import com.skillbox.blogengine.service.PostService;
+import com.skillbox.blogengine.service.UserService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 
 @RestController
 @RequestMapping("/api")
@@ -15,9 +17,11 @@ public class ApiPostController {
     private final static Logger LOGGER = LogManager.getLogger(ApiPostController.class);
 
     private final PostService postService;
+    private final UserService userService;
 
-    public ApiPostController(PostService postService) {
+    public ApiPostController(PostService postService, UserService userService) {
         this.postService = postService;
+        this.userService = userService;
     }
 
     @GetMapping("/post")
@@ -56,5 +60,16 @@ public class ApiPostController {
     public PostByIdResponse getPostsById(@PathVariable int ID) {
         LOGGER.info("Get posts with parameters:\nid = {}", ID);
         return postService.selectPostsById(ID);
+    }
+
+    @GetMapping("/post/my")
+    @PreAuthorize("hasAnyAuthority({'user:write', 'user:moderate'})")
+    public PostResponse getMyPosts(Principal principal,
+                                   @RequestParam(defaultValue = "0") Integer offset,
+                                   @RequestParam(defaultValue = "10") Integer limit,
+                                   PostStatus status) {
+        LOGGER.info("Get posts with parameters:\noffset = {}, limit = {}, status = {}", offset, limit, status);
+        LoggedUserResponse user = userService.getByEmail(principal.getName());
+        return postService.selectMyPosts(user.getId(), offset, limit, status);
     }
 }
