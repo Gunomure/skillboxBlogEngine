@@ -39,8 +39,8 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
         initResponse.setCopyrightFrom("2005");
         String expectedResponse = mapper.writeValueAsString(initResponse);
         mockMvc.perform(MockMvcRequestBuilders.get("/api/init")
-                .contentType(MediaType.APPLICATION_JSON)
-        ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedResponse));
     }
@@ -49,8 +49,8 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
     void getSettingsTest() throws Exception {
         // Поскольку значения полей могут меняться, проверим только их наличие
         mockMvc.perform(MockMvcRequestBuilders.get("/api/settings")
-                .contentType(MediaType.APPLICATION_JSON)
-        ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$['MULTIUSER_MODE']").exists())
                 .andExpect(jsonPath("$['POST_PREMODERATION']").exists())
@@ -60,12 +60,13 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
     @Test
     void getAuthCheckTest() throws Exception {
         // TODO когда добавится авторизация, добавить логику с авторизованным пользователем
-        NotAuthorizedUser notAuthorizedUser = new NotAuthorizedUser();
-        String expectedValue = mapper.writeValueAsString(notAuthorizedUser);
+        Map<String, Boolean> notAuthorizedUserResponse = new HashMap<>();
+        notAuthorizedUserResponse.put("result", false);
+        String expectedValue = mapper.writeValueAsString(notAuthorizedUserResponse);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/auth/check")
-                .contentType(MediaType.APPLICATION_JSON)
-        ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedValue));
     }
@@ -86,11 +87,11 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
         String expectedResponse = mapper.writeValueAsString(postResponse);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/post")
-                .contentType(MediaType.APPLICATION_JSON)
-                .param("offset", "0")
-                .param("limit", "10")
-                .param("mode", "recent")
-        ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("offset", "0")
+                        .param("limit", "10")
+                        .param("mode", "recent")
+                ).andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
         // игнорируем поле timestamp, так как оно может меняться в зависимости от времени запуска миграции
@@ -116,17 +117,18 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
         String expectedResponse = mapper.writeValueAsString(postResponse);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/post")
-                .contentType(MediaType.APPLICATION_JSON)
-                .param("offset", "0")
-                .param("limit", "10")
-                .param("mode", "popular")
-        ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("offset", "0")
+                        .param("limit", "10")
+                        .param("mode", "popular")
+                ).andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
         // игнорируем поле timestamp, так как оно может меняться в зависимости от времени запуска миграции
         JSONAssert.assertEquals(expectedResponse, mvcResult.getResponse().getContentAsString(),
                 new CustomComparator(JSONCompareMode.STRICT,
-                        new Customization("posts[*].timestamp", (o1, o2) -> true)));
+                        new Customization("posts[*].timestamp", (o1, o2) -> true),
+                        new Customization("posts[*].viewCount", (o1, o2) -> true)));
     }
 
     @Test
@@ -145,11 +147,11 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
         String expectedResponse = mapper.writeValueAsString(postResponse);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/post")
-                .contentType(MediaType.APPLICATION_JSON)
-                .param("offset", "0")
-                .param("limit", "10")
-                .param("mode", "best")
-        ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("offset", "0")
+                        .param("limit", "10")
+                        .param("mode", "best")
+                ).andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
         // игнорируем поле timestamp, так как оно может меняться в зависимости от времени запуска миграции
@@ -174,17 +176,18 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
         String expectedResponse = mapper.writeValueAsString(postResponse);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/post")
-                .contentType(MediaType.APPLICATION_JSON)
-                .param("offset", "0")
-                .param("limit", "10")
-                .param("mode", "early")
-        ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("offset", "0")
+                        .param("limit", "10")
+                        .param("mode", "early")
+                ).andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
         // игнорируем поле timestamp, так как оно может меняться в зависимости от времени запуска миграции
         JSONAssert.assertEquals(expectedResponse, mvcResult.getResponse().getContentAsString(),
                 new CustomComparator(JSONCompareMode.STRICT,
-                        new Customization("posts[*].timestamp", (o1, o2) -> true)));
+                        new Customization("posts[*].timestamp", (o1, o2) -> true),
+                        new Customization("posts[*].viewCount", (o1, o2) -> true)));
     }
 
     @Test
@@ -203,11 +206,11 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
         String expectedResponse = mapper.writeValueAsString(postResponse);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/post")
-                .contentType(MediaType.APPLICATION_JSON)
-                .param("offset", "")
-                .param("limit", "")
-                .param("mode", "")
-        ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("offset", "")
+                        .param("limit", "")
+                        .param("mode", "")
+                ).andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
         // игнорируем поле timestamp, так как оно может меняться в зависимости от времени запуска миграции
@@ -228,11 +231,11 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
         String expectedResponse = mapper.writeValueAsString(postResponse);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/post")
-                .contentType(MediaType.APPLICATION_JSON)
-                .param("offset", "2")
-                .param("limit", "1")
-                .param("mode", "recent")
-        ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("offset", "2")
+                        .param("limit", "1")
+                        .param("mode", "recent")
+                ).andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
         // игнорируем поле timestamp, так как оно может меняться в зависимости от времени запуска миграции
@@ -253,17 +256,18 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
         String expectedResponse = mapper.writeValueAsString(postResponse);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/post")
-                .contentType(MediaType.APPLICATION_JSON)
-                .param("offset", "0")
-                .param("limit", "1")
-                .param("mode", "recent")
-        ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("offset", "0")
+                        .param("limit", "1")
+                        .param("mode", "recent")
+                ).andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
         // игнорируем поле timestamp, так как оно может меняться в зависимости от времени запуска миграции
         JSONAssert.assertEquals(expectedResponse, mvcResult.getResponse().getContentAsString(),
                 new CustomComparator(JSONCompareMode.STRICT,
-                        new Customization("posts[*].timestamp", (o1, o2) -> true)));
+                        new Customization("posts[*].timestamp", (o1, o2) -> true),
+                        new Customization("posts[*].viewCount", (o1, o2) -> true)));
     }
 
     @Test
@@ -277,9 +281,9 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
         String expectedResponse = mapper.writeValueAsString(tagResponse);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/tag")
-                .contentType(MediaType.APPLICATION_JSON)
-                .param("query", "tag")
-        ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("query", "tag")
+                ).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedResponse));
     }
@@ -295,9 +299,9 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
         String expectedResponse = mapper.writeValueAsString(tagResponse);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/tag")
-                .contentType(MediaType.APPLICATION_JSON)
-                .param("query", "ag")
-        ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("query", "ag")
+                ).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedResponse));
     }
@@ -312,9 +316,9 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
         String expectedResponse = mapper.writeValueAsString(tagResponse);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/tag")
-                .contentType(MediaType.APPLICATION_JSON)
-                .param("query", "2")
-        ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("query", "2")
+                ).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedResponse));
     }
@@ -330,9 +334,9 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
         String expectedResponse = mapper.writeValueAsString(tagResponse);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/tag")
-                .contentType(MediaType.APPLICATION_JSON)
-                .param("query", "tAg")
-        ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("query", "tAg")
+                ).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedResponse));
     }
@@ -353,14 +357,15 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
         String expectedResponse = mapper.writeValueAsString(postResponse);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/post/search")
-                .contentType(MediaType.APPLICATION_JSON)
-        ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
         // игнорируем поле timestamp, так как оно может меняться в зависимости от времени запуска миграции
         JSONAssert.assertEquals(expectedResponse, mvcResult.getResponse().getContentAsString(),
                 new CustomComparator(JSONCompareMode.STRICT,
-                        new Customization("posts[*].timestamp", (o1, o2) -> true)));
+                        new Customization("posts[*].timestamp", (o1, o2) -> true),
+                        new Customization("posts[*].viewCount", (o1, o2) -> true)));
     }
 
     @Test
@@ -379,11 +384,11 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
         String expectedResponse = mapper.writeValueAsString(postResponse);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/post/search")
-                .contentType(MediaType.APPLICATION_JSON)
-                .param("offset", "0")
-                .param("limit", "10")
-                .param("query", "")
-        ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("offset", "0")
+                        .param("limit", "10")
+                        .param("query", "")
+                ).andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
         // игнорируем поле timestamp, так как оно может меняться в зависимости от времени запуска миграции
@@ -404,11 +409,11 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
         String expectedResponse = mapper.writeValueAsString(postResponse);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/post/search")
-                .contentType(MediaType.APPLICATION_JSON)
-                .param("offset", "0")
-                .param("limit", "10")
-                .param("query", "3")
-        ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("offset", "0")
+                        .param("limit", "10")
+                        .param("query", "3")
+                ).andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
         // игнорируем поле timestamp, так как оно может меняться в зависимости от времени запуска миграции
@@ -428,9 +433,9 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
         String expectedResponse = mapper.writeValueAsString(calendarResponse);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/calendar")
-                .contentType(MediaType.APPLICATION_JSON)
-                .param("year", "2020")
-        ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("year", "2020")
+                ).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedResponse));
     }
@@ -444,8 +449,8 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
         String expectedResponse = mapper.writeValueAsString(postResponse);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/post/byDate")
-                .contentType(MediaType.APPLICATION_JSON)
-        ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedResponse));
     }
@@ -462,11 +467,11 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
         String expectedResponse = mapper.writeValueAsString(postResponse);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/post/byDate")
-                .contentType(MediaType.APPLICATION_JSON)
-                .param("offset", "0")
-                .param("limit", "10")
-                .param("date", "2021-02-01")
-        ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("offset", "0")
+                        .param("limit", "10")
+                        .param("date", "2021-02-01")
+                ).andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -489,8 +494,8 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
         String expectedResponse = mapper.writeValueAsString(postResponse);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/post/byTag")
-                .contentType(MediaType.APPLICATION_JSON)
-        ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -512,11 +517,11 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
         String expectedResponse = mapper.writeValueAsString(postResponse);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/post/byTag")
-                .contentType(MediaType.APPLICATION_JSON)
-                .param("offset", "0")
-                .param("limit", "10")
-                .param("tag", "tag2")
-        ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("offset", "0")
+                        .param("limit", "10")
+                        .param("tag", "tag2")
+                ).andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -529,8 +534,8 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
     @Test
     void getPostsByWrongIdTest() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/api/post/1")
-                .contentType(MediaType.APPLICATION_JSON)
-        ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
                 .andExpect(status().isNotFound())
                 .andExpect(result -> assertTrue(result.getResolvedException() instanceof EntityNotFoundException))
                 .andExpect(result -> assertEquals("Document not found", result.getResolvedException().getMessage()));
@@ -557,8 +562,8 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
         String expectedResponse = mapper.writeValueAsString(postByIdResponse);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/post/2")
-                .contentType(MediaType.APPLICATION_JSON)
-        ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -566,8 +571,8 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
         postByIdResponse.setViewCount(postByIdResponse.getViewCount() + 1);
         String expectedResponse2 = mapper.writeValueAsString(postByIdResponse);
         MvcResult mvcResult2 = mockMvc.perform(MockMvcRequestBuilders.get("/api/post/2")
-                .contentType(MediaType.APPLICATION_JSON)
-        ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -584,8 +589,8 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
     @Test
     void getCaptchaTest() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/api/auth/captcha")
-                .contentType(MediaType.APPLICATION_JSON)
-        ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$['secret']").isNotEmpty())
                 .andExpect(jsonPath("$['image']").isNotEmpty());
@@ -594,8 +599,8 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
     @Test
     void postAuthRegisterTest() throws Exception {
         MvcResult mvcResultCaptcha = mockMvc.perform(MockMvcRequestBuilders.get("/api/auth/captcha")
-                .contentType(MediaType.APPLICATION_JSON)
-        ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
         String contentAsString = mvcResultCaptcha.getResponse().getContentAsString();
@@ -625,16 +630,17 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
         String expectedErrorResponse = mapper.writeValueAsString(registerErrorResponse);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(registrationContent)
-        ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(registrationContent)
+                ).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedResponse));
 
+        // при повторной регистрации должно выдать, что такой email уже существует
         mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(registrationContent)
-        ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(registrationContent)
+                ).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedErrorResponse));
     }

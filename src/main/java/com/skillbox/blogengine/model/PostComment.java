@@ -5,6 +5,7 @@ import lombok.Data;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Data
 @Entity
@@ -33,4 +34,17 @@ public class PostComment {
     @NotNull
     @Column(columnDefinition = "text COMMENT 'текст комментария'")
     private String text;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PostComment that = (PostComment) o;
+        return id == that.id && Objects.equals(parent, that.parent) && time.equals(that.time) && text.equals(that.text);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, parent, time, text);
+    }
 }

@@ -6,6 +6,7 @@ import org.springframework.lang.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Set;
 
 @Data
@@ -48,6 +49,10 @@ public class User {
     @OneToMany(mappedBy = "user")
     private Set<PostVote> postVotes;
 
+    public Role getRole() {
+        return isModerator ? Role.MODERATOR : Role.USER;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -63,5 +68,18 @@ public class User {
                 ", postsModerated=" + postsModerated.size() +
                 ", postVotes=" + postVotes +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return id == user.id && isModerator == user.isModerator && regTime.equals(user.regTime) && name.equals(user.name) && email.equals(user.email) && password.equals(user.password) && Objects.equals(code, user.code) && Objects.equals(photo, user.photo);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, isModerator, regTime, name, email, password, code, photo);
     }
 }

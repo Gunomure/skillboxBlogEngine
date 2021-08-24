@@ -26,15 +26,24 @@ public class TagToPost {
     private Tag tag;
 
     @Override
+    public String toString() {
+        return "TagToPost{" +
+                "id=" + id +
+                ", post=" + post.getId() +
+                ", tag=" + tag.getId() +
+                '}';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TagToPost tagToPost = (TagToPost) o;
-        return id == tagToPost.id && post.equals(tagToPost.post) && tag.equals(tagToPost.tag);
+        return id == tagToPost.id && post.getId() == tagToPost.post.getId() && tag.getId() == tagToPost.tag.getId();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, post, tag);
+        return Objects.hash(id, post.getId(), tag.getId());
     }
 }

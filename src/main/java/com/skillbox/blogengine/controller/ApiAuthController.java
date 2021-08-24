@@ -1,4 +1,73 @@
 package com.skillbox.blogengine.controller;
 
+import com.skillbox.blogengine.controller.exception.UserNotAuthorizedException;
+import com.skillbox.blogengine.dto.*;
+import com.skillbox.blogengine.service.CaptchaService;
+import com.skillbox.blogengine.service.RegisterService;
+import com.skillbox.blogengine.service.UserService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/auth")
 public class ApiAuthController {
+    private final static Logger LOGGER = LogManager.getLogger(ApiAuthController.class);
+
+    private final UserService userService;
+    private final CaptchaService captchaService;
+    private final RegisterService registerService;
+
+    public ApiAuthController(UserService userService, CaptchaService captchaService, RegisterService registerService) {
+        this.userService = userService;
+        this.captchaService = captchaService;
+        this.registerService = registerService;
+    }
+
+    @PostMapping("/login")
+    public LoggedUserResponse login(@RequestBody LoginData loginData) {
+        Authentication auth = new UsernamePasswordAuthenticationToken(loginData.getEmail(), loginData.getPassword());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        return userService.getByEmail(auth.getName());
+    }
+
+    @GetMapping("/check")
+    public LoggedUserResponse checkAuth(Principal principal) {
+        if (principal == null) {
+            throw new UserNotAuthorizedException("User not found");
+        } else {
+            return userService.getByEmail(principal.getName());
+        }
+    }
+
+    @GetMapping("/logout")
+    public Map<String, Boolean> logout(Principal principal) {
+        if (principal != null) {
+            SecurityContextHolder.clearContext();
+        }
+        Map<String, Boolean> result = new HashMap<>();
+        result.put("result", true);
+
+        return result;
+    }
+
+    @GetMapping("/captcha")
+    public CaptchaResponse getCaptcha() {
+        captchaService.deleteExpiredCaptcha();
+        return captchaService.createAndSaveCaptcha();
+    }
+
+    @PostMapping("/register")
+    public RegisterResponse postRegister(@RequestBody UserRegisterData userRegisterData) {
+        return registerService.registerUser(userRegisterData);
+    }
 }
