@@ -616,18 +616,18 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
                 captchaCodeBySecretCode.getCode(),
                 captchaResponse.getSecret());
 
-        RegisterResponse registerResponse = new RegisterResponse(true);
+        SimpleResponse simpleResponse = new SimpleResponse(true);
 
         Map<String, String> errors = new HashMap<>();
         errors.put("email", "Этот e-mail уже зарегистрирован");
-        RegisterErrorResponse registerErrorResponse = new RegisterErrorResponse();
-        registerErrorResponse.setResult(false);
-        registerErrorResponse.setErrors(errors);
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setResult(false);
+        errorResponse.setErrors(errors);
 
         String registrationContent = mapper.writeValueAsString(registerData);
 
-        String expectedResponse = mapper.writeValueAsString(registerResponse);
-        String expectedErrorResponse = mapper.writeValueAsString(registerErrorResponse);
+        String expectedResponse = mapper.writeValueAsString(simpleResponse);
+        String expectedErrorResponse = mapper.writeValueAsString(errorResponse);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)

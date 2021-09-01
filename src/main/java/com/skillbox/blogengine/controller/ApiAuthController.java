@@ -7,7 +7,6 @@ import com.skillbox.blogengine.service.RegisterService;
 import com.skillbox.blogengine.service.UserService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -67,7 +66,7 @@ public class ApiAuthController {
     }
 
     @PostMapping("/register")
-    public RegisterResponse postRegister(@RequestBody UserRegisterData userRegisterData) {
+    public SimpleResponse postRegister(@RequestBody UserRegisterData userRegisterData) {
         return registerService.registerUser(userRegisterData);
     }
 }

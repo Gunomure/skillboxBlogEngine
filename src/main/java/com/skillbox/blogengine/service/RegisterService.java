@@ -1,8 +1,7 @@
 package com.skillbox.blogengine.service;
 
-import com.skillbox.blogengine.controller.exception.EntityNotFoundException;
-import com.skillbox.blogengine.dto.RegisterErrorResponse;
-import com.skillbox.blogengine.dto.RegisterResponse;
+import com.skillbox.blogengine.dto.ErrorResponse;
+import com.skillbox.blogengine.dto.SimpleResponse;
 import com.skillbox.blogengine.dto.UserRegisterData;
 import com.skillbox.blogengine.model.CaptchaCode;
 import com.skillbox.blogengine.model.User;
@@ -28,7 +27,7 @@ public class RegisterService {
         this.captchaRepository = captchaRepository;
     }
 
-    public RegisterResponse registerUser(UserRegisterData user) {
+    public SimpleResponse registerUser(UserRegisterData user) {
         Optional<User> userByEmail = userRepository.findByEmail(user.getEmail());
         CaptchaCode captchaCodeBySecretCode = captchaRepository.findCaptchaCodeBySecretCode(user.getCaptchaSecret());
         if (!userByEmail.isPresent()
@@ -43,10 +42,10 @@ public class RegisterService {
             newUser.setEmail(user.getEmail());
             newUser.setPassword(user.getPassword());
             userRepository.save(newUser);
-            return new RegisterResponse(true);
+            return new SimpleResponse(true);
         } else {
             LOGGER.info("User's registration data is invalid. Return error");
-            RegisterErrorResponse registerResponse = new RegisterErrorResponse();
+            ErrorResponse registerResponse = new ErrorResponse();
             registerResponse.setResult(false);
             if (userByEmail.isPresent()) {
                 registerResponse.addError("email", "Этот e-mail уже зарегистрирован");
