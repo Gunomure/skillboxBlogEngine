@@ -9,6 +9,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RegisterResponse {
+public class SimpleResponse {
     private boolean result;
 }

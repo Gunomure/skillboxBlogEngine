@@ -1,6 +1,7 @@
 package com.skillbox.blogengine.controller;
 
 import com.skillbox.blogengine.dto.*;
+import com.skillbox.blogengine.model.ModerationStatus;
 import com.skillbox.blogengine.service.PostService;
 import com.skillbox.blogengine.service.UserService;
 import org.apache.logging.log4j.LogManager;
@@ -67,9 +68,27 @@ public class ApiPostController {
     public PostResponse getMyPosts(Principal principal,
                                    @RequestParam(defaultValue = "0") Integer offset,
                                    @RequestParam(defaultValue = "10") Integer limit,
-                                   PostStatus status) {
+                                   @RequestParam PostStatus status) {
         LOGGER.info("Get posts with parameters:\noffset = {}, limit = {}, status = {}", offset, limit, status);
         LoggedUserResponse user = userService.getByEmail(principal.getName());
-        return postService.selectMyPosts(user.getId(), offset, limit, status);
+        return postService.selectMyPosts(user.getUser().getId(), offset, limit, status);
+    }
+
+    @GetMapping("/post/moderation")
+    @PreAuthorize("hasAuthority('user:moderate')")
+    public PostResponse getPostsToModerate(Principal principal,
+                                           @RequestParam(defaultValue = "0") Integer offset,
+                                           @RequestParam(defaultValue = "10") Integer limit,
+                                           @RequestParam ModerationStatus status) {
+        LOGGER.info("Get posts with parameters:\noffset = {}, limit = {}, status = {}", offset, limit, status);
+        LoggedUserResponse user = userService.getByEmail(principal.getName());
+        return postService.selectModerationPosts(user.getUser().getId(), offset, limit, status);
+    }
+
+    @PostMapping("/post")
+    @PreAuthorize("hasAnyAuthority({'user:write', 'user:moderate'})")
+    public SimpleResponse addPost(Principal principal, @RequestBody PostAddRequest requestData) {
+        LOGGER.info(requestData.toString());
+        return postService.addPost(requestData, principal.getName());
     }
 }

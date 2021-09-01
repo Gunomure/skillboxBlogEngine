@@ -2,7 +2,9 @@ package com.skillbox.blogengine.service;
 
 import com.skillbox.blogengine.controller.exception.EntityNotFoundException;
 import com.skillbox.blogengine.dto.*;
+import com.skillbox.blogengine.model.ModerationStatus;
 import com.skillbox.blogengine.model.Post;
+import com.skillbox.blogengine.model.User;
 import com.skillbox.blogengine.model.custom.CommentUserInfo;
 import com.skillbox.blogengine.model.custom.PostUserCounts;
 import com.skillbox.blogengine.model.custom.PostWithComments;
@@ -10,6 +12,7 @@ import com.skillbox.blogengine.model.custom.PostsCountPerDate;
 import com.skillbox.blogengine.orm.PostCommentsRepository;
 import com.skillbox.blogengine.orm.PostRepository;
 import com.skillbox.blogengine.orm.TagRepository;
+import com.skillbox.blogengine.orm.UserRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jsoup.Jsoup;
@@ -17,6 +20,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,13 +34,15 @@ public class PostService {
     private final PostRepository postRepository;
     private final PostCommentsRepository postCommentsRepository;
     private final TagRepository tagRepository;
+    private final UserRepository userRepository;
 
     private static final int ANNOUNCE_MAX_LENGTH = 150;
 
-    public PostService(PostRepository postRepository, PostCommentsRepository postCommentsRepository, TagRepository tagRepository) {
+    public PostService(PostRepository postRepository, PostCommentsRepository postCommentsRepository, TagRepository tagRepository, UserRepository userRepository) {
         this.postRepository = postRepository;
         this.postCommentsRepository = postCommentsRepository;
         this.tagRepository = tagRepository;
+        this.userRepository = userRepository;
     }
 
     public PostResponse selectAllPostsByParameters(int offset, int limit, ModeType mode) {
@@ -96,21 +103,70 @@ public class PostService {
         PostResponse response = new PostResponse();
         PageRequest pageRequest = PageRequest.of(offset, limit);
         switch (status) {
-            case inactive:
+            case INACTIVE:
                 response = mapToPostResponse(postRepository.findInactivePosts(userId, pageRequest));
                 break;
-            case pending:
+            case PENDING:
                 response = mapToPostResponse(postRepository.findPendingPosts(userId, pageRequest));
                 break;
-            case declined:
+            case DECLINED:
                 response = mapToPostResponse(postRepository.findDeclinedPosts(userId, pageRequest));
                 break;
-            case published:
+            case PUBLISHED:
                 response = mapToPostResponse(postRepository.findPublishedPosts(userId, pageRequest));
                 break;
         }
 
         return response;
+    }
+
+    public PostResponse selectModerationPosts(int userId, int offset, int limit, ModerationStatus status) {
+        PostResponse response = new PostResponse();
+        PageRequest pageRequest = PageRequest.of(offset, limit);
+        switch (status) {
+            case NEW:
+                response = mapToPostResponse(postRepository.findPendingPosts(userId, pageRequest));
+                break;
+            case ACCEPTED:
+                response = mapToPostResponse(postRepository.findPublishedPosts(userId, pageRequest));
+                break;
+            case DECLINED:
+                response = mapToPostResponse(postRepository.findDeclinedPosts(userId, pageRequest));
+                break;
+        }
+
+        return response;
+    }
+
+    public SimpleResponse addPost(PostAddRequest requestData, String userEmail) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        if (requestData.getTitle().length() < 3 ||
+                requestData.getText().length() < 50) {
+            if (requestData.getTitle().length() < 3) {
+                errorResponse.addError("title", "Заголовок не установлен");
+            }
+            if (requestData.getText().length() < 50) {
+                errorResponse.addError("text", "Текст публикации слишком короткий");
+            }
+            return errorResponse;
+        } else {
+            Post post = new Post();
+            post.setActive(true);
+            User user = userRepository.findByEmail(userEmail)
+                    .orElseThrow(() -> new EntityNotFoundException("User " + userEmail + " not found"));
+            post.setAuthor(user);
+            post.setText(requestData.getText());
+            post.setTitle(requestData.getTitle());
+            post.setModerationStatus(ModerationStatus.NEW);
+            if (LocalDateTime.ofEpochSecond(requestData.getTimestamp(), 0, ZoneOffset.UTC)
+                    .isBefore(LocalDateTime.now())) {
+                post.setTime(LocalDateTime.now());
+            } else {
+                post.setTime(LocalDateTime.ofEpochSecond(requestData.getTimestamp(), 0, ZoneOffset.UTC));
+            }
+            postRepository.save(post);
+            return new SimpleResponse(true);
+        }
     }
 
     public long count() {

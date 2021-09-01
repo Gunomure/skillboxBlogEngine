@@ -1,7 +1,6 @@
 package com.skillbox.blogengine.dto;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.HashMap;
@@ -9,11 +8,11 @@ import java.util.Map;
 
 @Getter
 @Setter
-public class RegisterErrorResponse extends RegisterResponse {
+public class ErrorResponse extends SimpleResponse {
     private boolean result;
     private Map<String, String> errors;
 
-    public RegisterErrorResponse() {
+    public ErrorResponse() {
         errors = new HashMap<>();
     }
 

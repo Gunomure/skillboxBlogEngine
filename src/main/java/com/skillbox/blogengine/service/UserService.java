@@ -43,10 +43,11 @@ public class UserService {
     public LoggedUserResponse map(User user) {
         LoggedUserResponse userResponse = new LoggedUserResponse();
         userResponse.setResult(true);
-        userResponse.setId(user.getId());
-        userResponse.setName(user.getName());
-        userResponse.setPhoto(user.getPhoto());
-        userResponse.setEmail(user.getEmail());
+        LoggedUserResponse.UserLoggedData userLoggedData = new LoggedUserResponse.UserLoggedData();
+        userLoggedData.setId(user.getId());
+        userLoggedData.setName(user.getName());
+        userLoggedData.setPhoto(user.getPhoto());
+        userLoggedData.setEmail(user.getEmail());
         if (user.isModerator()) {
             System.out.println("user is moderator" + user.isModerator());
             Set<Post> posts = user.getPostsModerated();
@@ -56,10 +57,11 @@ public class UserService {
                     moderationCount++;
                 }
             }
-            userResponse.setModeration(true);
-            userResponse.setModerationCount(moderationCount);
-            userResponse.setSettings(true); // true если пользователь является модератором
+            userLoggedData.setModeration(true);
+            userLoggedData.setModerationCount(moderationCount);
+            userLoggedData.setSettings(true); // true если пользователь является модератором
         }
+        userResponse.setUser(userLoggedData);
 //        else {
 //            userResponse.setModeration(false);
 //            userResponse.setModerationCount(0);

@@ -26,7 +26,7 @@ values (true, 'NEW', 2, 1, now(), 'title 1', 'post text 1', 1)
      , (false, 'NEW', 1, 1, now(), 'title 11', 'post text 11', -1)
      , (true, 'NEW', 1, 1, now(), 'title 12', 'post text 12', 0)
      , (true, 'DECLINED', 1, 1, now(), 'title 13', 'post text 13', 2)
-     , (true, 'ACCEPTED', 1, 1, now(), 'title 14', 'post text 14', 2)
+     , (true, 'DECLINED', 1, 1, now(), 'title 14', 'post text 14', 2)
 ;
 
 insert into tag2post(post_id, tag_id)
