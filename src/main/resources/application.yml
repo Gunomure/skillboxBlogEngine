@@ -3,7 +3,7 @@ spring:
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
     show-sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
   datasource:
     url: jdbc:mysql://localhost:3306/blog-engine?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false&amp&serverTimezone=UTC
     driver-class-name: com.mysql.jdbc.Driver
