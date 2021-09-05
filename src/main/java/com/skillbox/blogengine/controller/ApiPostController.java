@@ -3,6 +3,7 @@ package com.skillbox.blogengine.controller;
 import com.skillbox.blogengine.dto.*;
 import com.skillbox.blogengine.model.ModerationStatus;
 import com.skillbox.blogengine.service.PostService;
+import com.skillbox.blogengine.service.TagService;
 import com.skillbox.blogengine.service.UserService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,10 +20,12 @@ public class ApiPostController {
 
     private final PostService postService;
     private final UserService userService;
+    private final TagService tagService;
 
-    public ApiPostController(PostService postService, UserService userService) {
+    public ApiPostController(PostService postService, UserService userService, TagService tagService) {
         this.postService = postService;
         this.userService = userService;
+        this.tagService = tagService;
     }
 
     @GetMapping("/post")
@@ -89,6 +92,7 @@ public class ApiPostController {
     @PreAuthorize("hasAnyAuthority({'user:write', 'user:moderate'})")
     public SimpleResponse addPost(Principal principal, @RequestBody PostAddRequest requestData) {
         LOGGER.info(requestData.toString());
+        LOGGER.info("Save post into DB");
         return postService.addPost(requestData, principal.getName());
     }
 

@@ -153,15 +153,21 @@ public class PostService {
             post.setText(requestData.getText());
             post.setTitle(requestData.getTitle());
             post.setModerationStatus(ModerationStatus.NEW);
-            Set<TagToPost> tagToPost = new HashSet<>();
-            List<String> tags = requestData.getTags();
-            List<Tag> tagsByName = tagRepository.findTagsByNameIn(tags);
-            TagToPost  = new TagToPost();
-            for (Tag tag : tagsByName) {
 
+            Set<TagToPost> tagToPosts = new HashSet<>();
+            List<String> receivedTags = requestData.getTags();
+            List<Tag> tagsFromRepository = tagRepository.findByNameIn(receivedTags);
+            if (tagsFromRepository.size() != receivedTags.size()) {
+                throw new IllegalArgumentException("Received wrong tags");
             }
-            qwe.setPost(post);
-//            qwe.setTag();
+            for (Tag tag : tagsFromRepository) {
+                TagToPost tagToPost = new TagToPost();
+                tagToPost.setTag(tag);
+                tagToPost.setPost(post);
+                tagToPosts.add(tagToPost);
+            }
+            post.setTagToPost(tagToPosts);
+
             if (LocalDateTime.ofEpochSecond(requestData.getTimestamp(), 0, ZoneOffset.UTC)
                     .isBefore(LocalDateTime.now())) {
                 post.setTime(LocalDateTime.now());
