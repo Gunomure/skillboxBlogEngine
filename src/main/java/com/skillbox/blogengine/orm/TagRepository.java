@@ -20,4 +20,6 @@ public interface TagRepository extends JpaRepository<Tag, Integer> {
             " JOIN t.posts p" +
             " WHERE p.id = :postId")
     List<String> findTagsByPostId(int postId);
+
+    List<Tag> findTagsByNameIn(List<String> names);
 }

@@ -91,4 +91,11 @@ public class ApiPostController {
         LOGGER.info(requestData.toString());
         return postService.addPost(requestData, principal.getName());
     }
+
+//    @PutMapping("/post/{ID}")
+//    @PreAuthorize("hasAnyAuthority({'user:write', 'user:moderate'})")
+//    public SimpleResponse addPost(Principal principal, @RequestBody PostAddRequest requestData) {
+//        LOGGER.info(requestData.toString());
+//        return postService.addPost(requestData, principal.getName());
+//    }
 }

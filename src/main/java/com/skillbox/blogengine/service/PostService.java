@@ -2,9 +2,7 @@ package com.skillbox.blogengine.service;
 
 import com.skillbox.blogengine.controller.exception.EntityNotFoundException;
 import com.skillbox.blogengine.dto.*;
-import com.skillbox.blogengine.model.ModerationStatus;
-import com.skillbox.blogengine.model.Post;
-import com.skillbox.blogengine.model.User;
+import com.skillbox.blogengine.model.*;
 import com.skillbox.blogengine.model.custom.CommentUserInfo;
 import com.skillbox.blogengine.model.custom.PostUserCounts;
 import com.skillbox.blogengine.model.custom.PostWithComments;
@@ -22,10 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class PostService {
@@ -158,6 +153,15 @@ public class PostService {
             post.setText(requestData.getText());
             post.setTitle(requestData.getTitle());
             post.setModerationStatus(ModerationStatus.NEW);
+            Set<TagToPost> tagToPost = new HashSet<>();
+            List<String> tags = requestData.getTags();
+            List<Tag> tagsByName = tagRepository.findTagsByNameIn(tags);
+            TagToPost  = new TagToPost();
+            for (Tag tag : tagsByName) {
+
+            }
+            qwe.setPost(post);
+//            qwe.setTag();
             if (LocalDateTime.ofEpochSecond(requestData.getTimestamp(), 0, ZoneOffset.UTC)
                     .isBefore(LocalDateTime.now())) {
                 post.setTime(LocalDateTime.now());
