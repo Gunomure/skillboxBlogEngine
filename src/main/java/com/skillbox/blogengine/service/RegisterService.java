@@ -1,5 +1,6 @@
 package com.skillbox.blogengine.service;
 
+import com.skillbox.blogengine.config.SecurityConfig;
 import com.skillbox.blogengine.dto.ErrorResponse;
 import com.skillbox.blogengine.dto.SimpleResponse;
 import com.skillbox.blogengine.dto.UserRegisterData;
@@ -21,10 +22,12 @@ public class RegisterService {
 
     private final UserRepository userRepository;
     private final CaptchaRepository captchaRepository;
+    private final SecurityConfig securityConfig;
 
-    public RegisterService(UserRepository userRepository, CaptchaRepository captchaRepository) {
+    public RegisterService(UserRepository userRepository, CaptchaRepository captchaRepository, SecurityConfig securityConfig) {
         this.userRepository = userRepository;
         this.captchaRepository = captchaRepository;
+        this.securityConfig = securityConfig;
     }
 
     public SimpleResponse registerUser(UserRegisterData user) {
@@ -40,7 +43,7 @@ public class RegisterService {
             newUser.setRegTime(LocalDateTime.now());
             newUser.setName(user.getName());
             newUser.setEmail(user.getEmail());
-            newUser.setPassword(user.getPassword());
+            newUser.setPassword(securityConfig.passwordEncoder().encode(user.getPassword()));
             userRepository.save(newUser);
             return new SimpleResponse(true);
         } else {
