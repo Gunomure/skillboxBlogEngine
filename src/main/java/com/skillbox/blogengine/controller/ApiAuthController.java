@@ -7,8 +7,10 @@ import com.skillbox.blogengine.service.RegisterService;
 import com.skillbox.blogengine.service.UserService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,19 +26,29 @@ public class ApiAuthController {
     private final UserService userService;
     private final CaptchaService captchaService;
     private final RegisterService registerService;
+    private final AuthenticationManager authenticationManager;
 
-    public ApiAuthController(UserService userService, CaptchaService captchaService, RegisterService registerService) {
+    public ApiAuthController(UserService userService, CaptchaService captchaService, RegisterService registerService, AuthenticationManager authenticationManager) {
         this.userService = userService;
         this.captchaService = captchaService;
         this.registerService = registerService;
+        this.authenticationManager = authenticationManager;
     }
 
     @PostMapping("/login")
     public LoggedUserResponse login(@RequestBody LoginData loginData) {
-        Authentication auth = new UsernamePasswordAuthenticationToken(loginData.getEmail(), loginData.getPassword());
-        SecurityContextHolder.getContext().setAuthentication(auth);
-
-        return userService.getByEmail(auth.getName());
+        LOGGER.info("Login user {}", loginData.getEmail());
+        try {
+            Authentication auth = authenticationManager
+                    .authenticate(new UsernamePasswordAuthenticationToken(loginData.getEmail(), loginData.getPassword()));
+            if (auth.isAuthenticated()) {
+                SecurityContextHolder.getContext().setAuthentication(auth);
+                return userService.getByEmail(auth.getName());
+            }
+        } catch (AuthenticationException e) {
+            LOGGER.error("Can not authorize user " + loginData.getEmail());
+        }
+        return new LoggedUserResponse();
     }
 
     @GetMapping("/check")
