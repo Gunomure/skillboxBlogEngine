@@ -25,3 +25,6 @@ blog_engine:
   email: mail@mail.ru
   copyright: Дмитрий Сергеев
   copyrightFrom: 2005
+  additional:
+    announceMaxLength: 150
+    uploadedMaxFileWeight: 100000

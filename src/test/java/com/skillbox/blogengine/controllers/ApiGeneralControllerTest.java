@@ -12,6 +12,8 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.skyscreamer.jsonassert.comparator.CustomComparator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -19,6 +21,8 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -644,6 +648,35 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
                 .andExpect(content().json(expectedErrorResponse));
     }
 
+    @Test
+    void imageUploadTest() throws Exception {
+        when(principal.getName()).thenReturn("test1@mail.ru");
+
+        MockMultipartFile file = new MockMultipartFile("image.png",
+                "image.png",
+                MediaType.MULTIPART_FORM_DATA_VALUE,
+                "some xml".getBytes());
+        ImageData image = new ImageData();
+        image.setImage(file);
+
+        LoginData loginData = new LoginData();
+        loginData.setEmail("test1@mail.ru");
+        loginData.setPassword("qweqwe1");
+        String loginJson = mapper.writeValueAsString(loginData);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginJson)
+                ).andDo(print())
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/image")
+                                .principal(principal)
+                                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+                                .flashAttr("image", image)
+                )
+                .andExpect(status().isOk());
+    }
     /**
      * TODO добавить тесты на проверку:
      *

@@ -17,6 +17,7 @@ import com.skillbox.blogengine.orm.UserRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jsoup.Jsoup;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,7 @@ public class PostService {
     private final TagRepository tagRepository;
     private final UserRepository userRepository;
 
+    @Value("${blog_engine.additional.announceMaxLength}")
     private static final int ANNOUNCE_MAX_LENGTH = 150;
 
     public PostService(PostRepository postRepository, PostCommentsRepository postCommentsRepository, TagRepository tagRepository, UserRepository userRepository) {

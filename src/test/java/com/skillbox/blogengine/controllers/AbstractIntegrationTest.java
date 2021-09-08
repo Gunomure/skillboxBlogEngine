@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skillbox.blogengine.initializer.Mysql;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -11,6 +12,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import java.security.Principal;
 
 import static com.skillbox.blogengine.initializer.Mysql.mysqlContainer;
 
@@ -36,6 +39,9 @@ public abstract class AbstractIntegrationTest {
      */
     @Autowired
     protected ObjectMapper mapper;
+
+    @Mock
+    Principal principal;
 
     /**
      * run single container for all tests

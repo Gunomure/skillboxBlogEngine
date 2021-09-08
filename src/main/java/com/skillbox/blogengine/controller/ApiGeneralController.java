@@ -1,19 +1,17 @@
 package com.skillbox.blogengine.controller;
 
-import com.skillbox.blogengine.dto.CalendarResponse;
-import com.skillbox.blogengine.dto.GlobalSettingsResponse;
-import com.skillbox.blogengine.dto.InitResponse;
-import com.skillbox.blogengine.dto.TagResponse;
+import com.skillbox.blogengine.dto.*;
+import com.skillbox.blogengine.service.GeneralService;
 import com.skillbox.blogengine.service.GlobalSettingsService;
 import com.skillbox.blogengine.service.PostService;
 import com.skillbox.blogengine.service.TagService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.time.LocalDate;
 
 @RestController
@@ -25,12 +23,14 @@ public class ApiGeneralController {
     private final GlobalSettingsService settingsService;
     private final PostService postService;
     private final TagService tagService;
+    private final GeneralService generalService;
 
-    public ApiGeneralController(InitResponse initResponse, GlobalSettingsService settingsService, PostService postService, TagService tagService) {
+    public ApiGeneralController(InitResponse initResponse, GlobalSettingsService settingsService, PostService postService, TagService tagService, GeneralService generalService) {
         this.initResponse = initResponse;
         this.settingsService = settingsService;
         this.postService = postService;
         this.tagService = tagService;
+        this.generalService = generalService;
     }
 
     @GetMapping("/init")
@@ -56,5 +56,13 @@ public class ApiGeneralController {
         }
 
         return postService.selectPostsCountsByYear(year);
+    }
+
+    @PostMapping(path = "/image", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PreAuthorize("hasAnyAuthority({'user:write', 'user:moderate'})")
+    public String uploadImage(Principal principal, @ModelAttribute("image") ImageData image) {
+        LOGGER.info("user: {}", principal.getName());
+        LOGGER.info("uploadImage: {}", image.getImage().getOriginalFilename());
+        return generalService.saveImage(image);
     }
 }

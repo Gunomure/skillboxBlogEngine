@@ -61,7 +61,9 @@ public class Post {
     private Set<PostVote> postVotes;
 
     public void setTags(List<Tag> tagsToSet) {
-        this.tagToPost.clear();
+        if (this.tagToPost != null) {
+            this.tagToPost.clear();
+        }
         for (Tag tag : tagsToSet) {
             TagToPost tagToPost = new TagToPost();
             tagToPost.setPost(this);
