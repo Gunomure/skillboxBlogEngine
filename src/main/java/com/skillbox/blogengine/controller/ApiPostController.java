@@ -61,9 +61,9 @@ public class ApiPostController {
     }
 
     @GetMapping("/post/{ID}")
-    public PostByIdResponse getPostsById(@PathVariable int ID) {
+    public PostByIdResponse getPostsById(Principal principal, @PathVariable int ID) {
         LOGGER.info("Get posts with parameters:\nid = {}", ID);
-        return postService.selectPostsById(ID);
+        return postService.selectPostsById(ID, principal);
     }
 
     @GetMapping("/post/my")
@@ -96,10 +96,10 @@ public class ApiPostController {
         return postService.addPost(requestData, principal.getName());
     }
 
-//    @PutMapping("/post/{ID}")
-//    @PreAuthorize("hasAnyAuthority({'user:write', 'user:moderate'})")
-//    public SimpleResponse addPost(Principal principal, @RequestBody PostAddRequest requestData) {
-//        LOGGER.info(requestData.toString());
-//        return postService.addPost(requestData, principal.getName());
-//    }
+    @PutMapping("/post/{ID}")
+    @PreAuthorize("hasAnyAuthority({'user:write', 'user:moderate'})")
+    public SimpleResponse updatePost(Principal principal, @PathVariable int ID, @RequestBody PostAddRequest requestData) {
+        LOGGER.info(requestData.toString());
+        return postService.updatePost(ID, requestData, principal.getName());
+    }
 }

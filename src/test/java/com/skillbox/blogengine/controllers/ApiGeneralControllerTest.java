@@ -533,7 +533,7 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
 
     @Test
     void getPostsByWrongIdTest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/post/1")
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/post/111")
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(print())
                 .andExpect(status().isNotFound())
@@ -567,8 +567,7 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        // проверяем, что при вызове апи количество просмотров увеличилось
-        postByIdResponse.setViewCount(postByIdResponse.getViewCount() + 1);
+        // поскольку нет авторизации, количество просмотров не увеличивается
         String expectedResponse2 = mapper.writeValueAsString(postByIdResponse);
         MvcResult mvcResult2 = mockMvc.perform(MockMvcRequestBuilders.get("/api/post/2")
                         .contentType(MediaType.APPLICATION_JSON)

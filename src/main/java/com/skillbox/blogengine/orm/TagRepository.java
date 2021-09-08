@@ -17,8 +17,8 @@ public interface TagRepository extends JpaRepository<Tag, Integer> {
     List<TagUsageStatistics> findTagsByNameWithUsages(String name, Sort sort);
 
     @Query("SELECT t.name FROM Tag t" +
-            " JOIN t.posts p" +
-            " WHERE p.id = :postId")
+            " JOIN t.posts t2p" +
+            " WHERE t2p.post.id = :postId")
     List<String> findTagsByPostId(int postId);
 
     List<Tag> findByNameIn(List<String> names);

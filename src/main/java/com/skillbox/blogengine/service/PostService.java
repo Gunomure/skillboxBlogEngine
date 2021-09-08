@@ -2,7 +2,10 @@ package com.skillbox.blogengine.service;
 
 import com.skillbox.blogengine.controller.exception.EntityNotFoundException;
 import com.skillbox.blogengine.dto.*;
-import com.skillbox.blogengine.model.*;
+import com.skillbox.blogengine.model.ModerationStatus;
+import com.skillbox.blogengine.model.Post;
+import com.skillbox.blogengine.model.Tag;
+import com.skillbox.blogengine.model.User;
 import com.skillbox.blogengine.model.custom.CommentUserInfo;
 import com.skillbox.blogengine.model.custom.PostUserCounts;
 import com.skillbox.blogengine.model.custom.PostWithComments;
@@ -18,6 +21,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -76,7 +80,9 @@ public class PostService {
         return mapToPostResponse(postRepository.findPostsInfoByTag(tag, pageRequest));
     }
 
-    public PostByIdResponse selectPostsById(int postId) {
+    public PostByIdResponse selectPostsById(int postId, Principal principal) {
+        Optional<User> currentUser = userRepository.findByEmail(principal != null ? principal.getName() : "");
+
         // заполняем comments в response
         PostWithComments postInfoById = postRepository.findPostInfoById(postId);
         List<CommentUserInfo> commentsByPostId;
@@ -86,7 +92,12 @@ public class PostService {
             // заполняем основную часть response
             tagsByPostId = tagRepository.findTagsByPostId(postId);
             Post postById = postRepository.findPostById(postId);
-            postById.setViewCount(postById.getViewCount() + 1);
+            // увеличиваем просмотры, если пользователь не модератор и не автор поста
+            if (currentUser.isPresent() && !currentUser.get().isModerator()
+                    && currentUser.get().getId() != postInfoById.getUserId()) {
+                postById.setViewCount(postById.getViewCount() + 1);
+            }
+
             postRepository.save(postById);
         } else {
             throw new EntityNotFoundException("Document not found");
@@ -133,10 +144,36 @@ public class PostService {
         return response;
     }
 
-    public SimpleResponse addPost(PostAddRequest requestData, String userEmail) {
-        ErrorResponse errorResponse = new ErrorResponse();
+    public SimpleResponse updatePost(int postId, PostAddRequest requestData, String userEmail) {
         if (requestData.getTitle().length() < 3 ||
                 requestData.getText().length() < 50) {
+            ErrorResponse errorResponse = new ErrorResponse();
+            if (requestData.getTitle().length() < 3) {
+                errorResponse.addError("title", "Заголовок не установлен");
+            }
+            if (requestData.getText().length() < 50) {
+                errorResponse.addError("text", "Текст публикации слишком короткий");
+            }
+            return errorResponse;
+        } else {
+            User user = userRepository.findByEmail(userEmail)
+                    .orElseThrow(() -> new EntityNotFoundException("User " + userEmail + " not found"));
+            Post post = postRepository.findPostById(postId);
+
+            fillPost(post, requestData);
+            if (!user.isModerator()) {
+                post.setModerationStatus(ModerationStatus.NEW);
+            }
+
+            postRepository.save(post);
+            return new SimpleResponse(true);
+        }
+    }
+
+    public SimpleResponse addPost(PostAddRequest requestData, String userEmail) {
+        if (requestData.getTitle().length() < 3 ||
+                requestData.getText().length() < 50) {
+            ErrorResponse errorResponse = new ErrorResponse();
             if (requestData.getTitle().length() < 3) {
                 errorResponse.addError("title", "Заголовок не установлен");
             }
@@ -146,36 +183,35 @@ public class PostService {
             return errorResponse;
         } else {
             Post post = new Post();
-            post.setActive(true);
             User user = userRepository.findByEmail(userEmail)
                     .orElseThrow(() -> new EntityNotFoundException("User " + userEmail + " not found"));
-            post.setAuthor(user);
-            post.setText(requestData.getText());
-            post.setTitle(requestData.getTitle());
+
+            fillPost(post, requestData);
+            post.setActive(true);
             post.setModerationStatus(ModerationStatus.NEW);
+            post.setAuthor(user);
 
-            Set<TagToPost> tagToPosts = new HashSet<>();
-            List<String> receivedTags = requestData.getTags();
-            List<Tag> tagsFromRepository = tagRepository.findByNameIn(receivedTags);
-            if (tagsFromRepository.size() != receivedTags.size()) {
-                throw new IllegalArgumentException("Received wrong tags");
-            }
-            for (Tag tag : tagsFromRepository) {
-                TagToPost tagToPost = new TagToPost();
-                tagToPost.setTag(tag);
-                tagToPost.setPost(post);
-                tagToPosts.add(tagToPost);
-            }
-            post.setTagToPost(tagToPosts);
-
-            if (LocalDateTime.ofEpochSecond(requestData.getTimestamp(), 0, ZoneOffset.UTC)
-                    .isBefore(LocalDateTime.now())) {
-                post.setTime(LocalDateTime.now());
-            } else {
-                post.setTime(LocalDateTime.ofEpochSecond(requestData.getTimestamp(), 0, ZoneOffset.UTC));
-            }
             postRepository.save(post);
             return new SimpleResponse(true);
+        }
+    }
+
+    private void fillPost(Post post, PostAddRequest requestData) {
+        post.setTitle(requestData.getTitle());
+        post.setActive(requestData.isActive());
+        post.setText(requestData.getText());
+        post.setTime(getUsableDateTime(requestData.getTimestamp()));
+
+        List<Tag> tagsFromRepository = tagRepository.findByNameIn(requestData.getTags());
+        post.setTags(tagsFromRepository);
+    }
+
+    private LocalDateTime getUsableDateTime(long timestamp) {
+        if (LocalDateTime.ofEpochSecond(timestamp, 0, ZoneOffset.UTC)
+                .isBefore(LocalDateTime.now())) {
+            return LocalDateTime.now();
+        } else {
+            return LocalDateTime.ofEpochSecond(timestamp, 0, ZoneOffset.UTC);
         }
     }
 

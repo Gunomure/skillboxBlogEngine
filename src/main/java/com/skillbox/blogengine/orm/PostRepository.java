@@ -87,8 +87,7 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             " LEFT JOIN p.comments pc" +
             " LEFT JOIN p.author a" +
             " LEFT JOIN p.postVotes pv" +
-            " WHERE p.isActive = TRUE AND p.moderationStatus = 'ACCEPTED' AND now() >= p.time" +
-            "     AND p.id = :id" +
+            " WHERE p.id = :id" +
             " GROUP BY p.id, pc.post, pv.post")
     PostWithComments findPostInfoById(int id);
 

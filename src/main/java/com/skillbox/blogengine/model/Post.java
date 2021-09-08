@@ -5,6 +5,7 @@ import lombok.Data;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -58,6 +59,16 @@ public class Post {
 
     @OneToMany(mappedBy = "post")
     private Set<PostVote> postVotes;
+
+    public void setTags(List<Tag> tagsToSet) {
+        this.tagToPost.clear();
+        for (Tag tag : tagsToSet) {
+            TagToPost tagToPost = new TagToPost();
+            tagToPost.setPost(this);
+            tagToPost.setTag(tag);
+            this.tagToPost.add(tagToPost);
+        }
+    }
 
     @Override
     public String toString() {
