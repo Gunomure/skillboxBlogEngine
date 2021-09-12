@@ -37,7 +37,7 @@ public class PostService {
     private final UserRepository userRepository;
 
     @Value("${blog_engine.additional.announceMaxLength}")
-    private static final int ANNOUNCE_MAX_LENGTH = 150;
+    private static int ANNOUNCE_MAX_LENGTH;
 
     public PostService(PostRepository postRepository, PostCommentsRepository postCommentsRepository, TagRepository tagRepository, UserRepository userRepository) {
         this.postRepository = postRepository;
@@ -202,13 +202,13 @@ public class PostService {
         post.setTitle(requestData.getTitle());
         post.setActive(requestData.isActive());
         post.setText(requestData.getText());
-        post.setTime(getUsableDateTime(requestData.getTimestamp()));
+        post.setTime(timestampToUtcDatetime(requestData.getTimestamp()));
 
         List<Tag> tagsFromRepository = tagRepository.findByNameIn(requestData.getTags());
         post.setTags(tagsFromRepository);
     }
 
-    private LocalDateTime getUsableDateTime(long timestamp) {
+    private LocalDateTime timestampToUtcDatetime(long timestamp) {
         if (LocalDateTime.ofEpochSecond(timestamp, 0, ZoneOffset.UTC)
                 .isBefore(LocalDateTime.now())) {
             return LocalDateTime.now();

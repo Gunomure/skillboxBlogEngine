@@ -1,10 +1,7 @@
 package com.skillbox.blogengine.controller;
 
 import com.skillbox.blogengine.dto.*;
-import com.skillbox.blogengine.service.GeneralService;
-import com.skillbox.blogengine.service.GlobalSettingsService;
-import com.skillbox.blogengine.service.PostService;
-import com.skillbox.blogengine.service.TagService;
+import com.skillbox.blogengine.service.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.MediaType;
@@ -24,13 +21,15 @@ public class ApiGeneralController {
     private final PostService postService;
     private final TagService tagService;
     private final GeneralService generalService;
+    private final PostCommentsService postCommentsService;
 
-    public ApiGeneralController(InitResponse initResponse, GlobalSettingsService settingsService, PostService postService, TagService tagService, GeneralService generalService) {
+    public ApiGeneralController(InitResponse initResponse, GlobalSettingsService settingsService, PostService postService, TagService tagService, GeneralService generalService, PostCommentsService postCommentsService) {
         this.initResponse = initResponse;
         this.settingsService = settingsService;
         this.postService = postService;
         this.tagService = tagService;
         this.generalService = generalService;
+        this.postCommentsService = postCommentsService;
     }
 
     @GetMapping("/init")
@@ -61,9 +60,15 @@ public class ApiGeneralController {
     @PostMapping(path = "/image", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     @PreAuthorize("hasAnyAuthority({'user:write', 'user:moderate'})")
     public String uploadImage(Principal principal, @ModelAttribute("image") ImageData image) {
-        // TODO возвращать error если файл слишком большой + тест на это
         LOGGER.info("user: {}", principal.getName());
         LOGGER.info("uploadImage: {}", image.getImage().getOriginalFilename());
         return generalService.saveImage(image);
+    }
+
+    @PostMapping("/comment")
+    @PreAuthorize("hasAnyAuthority({'user:write', 'user:moderate'})")
+    public AdditionCommentResponse addComent(Principal principal, @RequestBody CommentData commentData) {
+        LOGGER.info("Add comment for post {}", commentData.getPostId());
+        return postCommentsService.addComment(commentData, principal.getName());
     }
 }
