@@ -1,7 +1,8 @@
 package com.skillbox.blogengine.controller;
 
 import com.skillbox.blogengine.dto.*;
-import com.skillbox.blogengine.model.ModerationStatus;
+import com.skillbox.blogengine.dto.enums.ModeType;
+import com.skillbox.blogengine.model.enums.ModerationStatus;
 import com.skillbox.blogengine.service.PostService;
 import com.skillbox.blogengine.service.TagService;
 import com.skillbox.blogengine.service.UserService;

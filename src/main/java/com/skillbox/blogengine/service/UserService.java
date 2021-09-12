@@ -2,7 +2,7 @@ package com.skillbox.blogengine.service;
 
 import com.skillbox.blogengine.controller.exception.EntityNotFoundException;
 import com.skillbox.blogengine.dto.LoggedUserResponse;
-import com.skillbox.blogengine.model.ModerationStatus;
+import com.skillbox.blogengine.model.enums.ModerationStatus;
 import com.skillbox.blogengine.model.Post;
 import com.skillbox.blogengine.model.User;
 import com.skillbox.blogengine.orm.UserRepository;

@@ -1,8 +1,10 @@
 package com.skillbox.blogengine.service;
 
 import com.skillbox.blogengine.controller.exception.EntityNotFoundException;
+import com.skillbox.blogengine.controller.exception.SimpleException;
 import com.skillbox.blogengine.dto.*;
-import com.skillbox.blogengine.model.ModerationStatus;
+import com.skillbox.blogengine.dto.enums.ModeType;
+import com.skillbox.blogengine.model.enums.ModerationStatus;
 import com.skillbox.blogengine.model.Post;
 import com.skillbox.blogengine.model.Tag;
 import com.skillbox.blogengine.model.User;
@@ -37,7 +39,7 @@ public class PostService {
     private final UserRepository userRepository;
 
     @Value("${blog_engine.additional.announceMaxLength}")
-    private static int ANNOUNCE_MAX_LENGTH;
+    private int ANNOUNCE_MAX_LENGTH;
 
     public PostService(PostRepository postRepository, PostCommentsRepository postCommentsRepository, TagRepository tagRepository, UserRepository userRepository) {
         this.postRepository = postRepository;
@@ -208,6 +210,18 @@ public class PostService {
         post.setTags(tagsFromRepository);
     }
 
+    public void moderatePost(PostStatusModerationData moderationData, String userEmail) {
+        Optional<User> user = userRepository.findByEmail(userEmail);
+        if (user.isEmpty() || !user.get().isModerator()) {
+            throw new SimpleException("User does not exist or is not a moderator");
+        } else if (!postRepository.existsById(moderationData.getPostId())) {
+            throw new SimpleException(String.format("Post %d does not exist", moderationData.getPostId()));
+        }
+        Post post = postRepository.findPostById(moderationData.getPostId());
+        post.setModerationStatus(moderationData.getDecision());
+        postRepository.save(post);
+    }
+
     private LocalDateTime timestampToUtcDatetime(long timestamp) {
         if (LocalDateTime.ofEpochSecond(timestamp, 0, ZoneOffset.UTC)
                 .isBefore(LocalDateTime.now())) {
@@ -268,7 +282,7 @@ public class PostService {
         return postByIdResponse;
     }
 
-    public static PostResponse mapToPostResponse(List<PostUserCounts> postsAdditionalInfo) {
+    public PostResponse mapToPostResponse(List<PostUserCounts> postsAdditionalInfo) {
         PostResponse response = new PostResponse();
         response.setCount(postsAdditionalInfo.size());
 
@@ -280,7 +294,7 @@ public class PostService {
         return response;
     }
 
-    private static PostResponse.PostInfo createPostInfo(PostUserCounts post) {
+    private PostResponse.PostInfo createPostInfo(PostUserCounts post) {
         // так проще всего удалить html тэги
         String announceWithoutTags = Jsoup.parse(post.getAnnounce()).text();
         if (announceWithoutTags.length() > ANNOUNCE_MAX_LENGTH) {

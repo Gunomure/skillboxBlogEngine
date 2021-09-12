@@ -1,6 +1,6 @@
 package com.skillbox.blogengine.config;
 
-import com.skillbox.blogengine.model.ModerationStatus;
+import com.skillbox.blogengine.model.enums.ModerationStatus;
 import org.springframework.core.convert.converter.Converter;
 
 public class StringToModerationStatus implements Converter<String, ModerationStatus> {

@@ -71,4 +71,12 @@ public class ApiGeneralController {
         LOGGER.info("Add comment for post {}", commentData.getPostId());
         return postCommentsService.addComment(commentData, principal.getName());
     }
+
+    @PostMapping("/moderation")
+    @PreAuthorize("hasAuthority({'user:moderate'})")
+    public SimpleResponse moderation(Principal principal, @RequestBody PostStatusModerationData moderationData) {
+        LOGGER.info("Make decision for post {}", moderationData.getPostId());
+        postService.moderatePost(moderationData, principal.getName());
+        return new SimpleResponse(true);
+    }
 }

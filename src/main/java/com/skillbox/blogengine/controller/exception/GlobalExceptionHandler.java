@@ -32,6 +32,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
+    @ExceptionHandler(SimpleException.class)
+    protected ResponseEntity<CustomErrorResponse> handleSimpleException(SimpleException ex) {
+        CustomErrorResponse errors = new CustomErrorResponse();
+        errors.setTimestamp(LocalDateTime.now());
+        errors.setError(ex.getMessage());
+        errors.setStatus(HttpStatus.OK.value());
+        return new ResponseEntity<>(errors, HttpStatus.OK);
+    }
+
     @ExceptionHandler(BadRequestException.class)
     protected ResponseEntity<CustomErrorResponse> handleBadRequestxception(BadRequestException ex) {
         CustomErrorResponse errors = new CustomErrorResponse();

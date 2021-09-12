@@ -1,5 +1,6 @@
 package com.skillbox.blogengine.model;
 
+import com.skillbox.blogengine.model.enums.ModerationStatus;
 import lombok.Data;
 
 import javax.persistence.*;

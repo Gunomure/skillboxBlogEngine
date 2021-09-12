@@ -1,4 +1,4 @@
-package com.skillbox.blogengine.model;
+package com.skillbox.blogengine.model.enums;
 
 public enum ModerationStatus {
     NEW,

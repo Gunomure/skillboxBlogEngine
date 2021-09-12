@@ -4,7 +4,10 @@ import com.skillbox.blogengine.controller.exception.BadRequestException;
 import com.skillbox.blogengine.controller.exception.EntityNotFoundException;
 import com.skillbox.blogengine.dto.*;
 import com.skillbox.blogengine.model.CaptchaCode;
+import com.skillbox.blogengine.model.Post;
+import com.skillbox.blogengine.model.enums.ModerationStatus;
 import com.skillbox.blogengine.orm.CaptchaRepository;
+import com.skillbox.blogengine.orm.PostRepository;
 import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.Customization;
@@ -15,12 +18,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.*;
 
+import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
@@ -31,6 +34,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ApiGeneralControllerTest extends AbstractIntegrationTest {
     @Autowired
     CaptchaRepository captchaRepository;
+    @Autowired
+    private PostRepository postRepository;
     @Value("${blog_engine.additional.uploadedMaxFileWeight}")
     private int FILE_MAX_WEIGHT;
 
@@ -675,15 +680,15 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk());
 
         mockMvc.perform(post("/api/image")
-                                .principal(principal)
-                                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
-                                .flashAttr("image", image)
+                        .principal(principal)
+                        .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+                        .flashAttr("image", image)
                 )
                 .andExpect(status().isOk());
     }
 
     @Test
-    void uploadWrongNamedImageShouldReturnError() throws Exception {
+    void uploadWrongNamedImageShouldReturnErrorTest() throws Exception {
         when(principal.getName()).thenReturn("test1@mail.ru");
 
         MockMultipartFile file = new MockMultipartFile("image.png",
@@ -715,12 +720,12 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void uploadWrongWeightedImageShouldReturnError() throws Exception {
+    void uploadWrongWeightedImageShouldReturnErrorTest() throws Exception {
         when(principal.getName()).thenReturn("test1@mail.ru");
 
         StringBuilder stringBuilder = new StringBuilder();
         final String hugeString = "a";
-        for (int i = 0; i < FILE_MAX_WEIGHT + 1;i++) {
+        for (int i = 0; i < FILE_MAX_WEIGHT + 1; i++) {
             stringBuilder.append(hugeString);
         }
 
@@ -750,6 +755,60 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertTrue(result.getResolvedException() instanceof BadRequestException))
                 .andExpect(result -> assertEquals("Wrong image weight", result.getResolvedException().getMessage()));
+    }
+
+    @Test
+    void moderationChangePostStatusTest() throws Exception {
+        when(principal.getName()).thenReturn("test1@mail.ru");
+
+        LoginData loginData = new LoginData();
+        loginData.setEmail("test1@mail.ru");
+        loginData.setPassword("qweqwe1");
+        String loginJson = mapper.writeValueAsString(loginData);
+
+        PostStatusModerationData moderationData = new PostStatusModerationData();
+        moderationData.setPostId(1);
+        moderationData.setDecision(ModerationStatus.DECLINED);
+        String moderationDataJson = mapper.writeValueAsString(moderationData);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginJson)
+                ).andDo(print())
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/moderation")
+                        .principal(principal)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(moderationDataJson)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$['result']", is(true)));
+
+        Post postById = postRepository.findPostById(1);
+        assertEquals(ModerationStatus.DECLINED, postById.getModerationStatus());
+    }
+
+    @Test
+    void moderationByWringUserShouldReturnErrorTest() throws Exception {
+        when(principal.getName()).thenReturn("test2@mail.ru");
+
+        LoginData loginData = new LoginData();
+        loginData.setEmail("test2@mail.ru");
+        loginData.setPassword("qweqwe2");
+        String loginJson = mapper.writeValueAsString(loginData);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginJson)
+                ).andDo(print())
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/moderation")
+                        .principal(principal)
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
+                .andExpect(status().isBadRequest());
     }
     /**
      * TODO добавить тесты на проверку:
