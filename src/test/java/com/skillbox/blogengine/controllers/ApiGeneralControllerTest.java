@@ -1,5 +1,6 @@
 package com.skillbox.blogengine.controllers;
 
+import com.skillbox.blogengine.controller.exception.BadRequestException;
 import com.skillbox.blogengine.controller.exception.EntityNotFoundException;
 import com.skillbox.blogengine.dto.*;
 import com.skillbox.blogengine.model.CaptchaCode;
@@ -11,6 +12,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.skyscreamer.jsonassert.comparator.CustomComparator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -29,6 +31,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ApiGeneralControllerTest extends AbstractIntegrationTest {
     @Autowired
     CaptchaRepository captchaRepository;
+    @Value("${blog_engine.additional.uploadedMaxFileWeight}")
+    private int FILE_MAX_WEIGHT;
 
     private static final String LONG_POST_TEXT = "post text 4aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...";
 
@@ -676,6 +680,76 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
                                 .flashAttr("image", image)
                 )
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void uploadWrongNamedImageShouldReturnError() throws Exception {
+        when(principal.getName()).thenReturn("test1@mail.ru");
+
+        MockMultipartFile file = new MockMultipartFile("image.png",
+                "image.jpeg",
+                MediaType.MULTIPART_FORM_DATA_VALUE,
+                "some xml".getBytes());
+        ImageData image = new ImageData();
+        image.setImage(file);
+
+        LoginData loginData = new LoginData();
+        loginData.setEmail("test1@mail.ru");
+        loginData.setPassword("qweqwe1");
+        String loginJson = mapper.writeValueAsString(loginData);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginJson)
+                ).andDo(print())
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/image")
+                        .principal(principal)
+                        .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+                        .flashAttr("image", image)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof BadRequestException))
+                .andExpect(result -> assertEquals("Wrong image extension", result.getResolvedException().getMessage()));
+    }
+
+    @Test
+    void uploadWrongWeightedImageShouldReturnError() throws Exception {
+        when(principal.getName()).thenReturn("test1@mail.ru");
+
+        StringBuilder stringBuilder = new StringBuilder();
+        final String hugeString = "a";
+        for (int i = 0; i < FILE_MAX_WEIGHT + 1;i++) {
+            stringBuilder.append(hugeString);
+        }
+
+        MockMultipartFile file = new MockMultipartFile("image.png",
+                "image.png",
+                MediaType.MULTIPART_FORM_DATA_VALUE,
+                stringBuilder.toString().getBytes());
+        ImageData image = new ImageData();
+        image.setImage(file);
+
+        LoginData loginData = new LoginData();
+        loginData.setEmail("test1@mail.ru");
+        loginData.setPassword("qweqwe1");
+        String loginJson = mapper.writeValueAsString(loginData);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginJson)
+                ).andDo(print())
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/image")
+                        .principal(principal)
+                        .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+                        .flashAttr("image", image)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof BadRequestException))
+                .andExpect(result -> assertEquals("Wrong image weight", result.getResolvedException().getMessage()));
     }
     /**
      * TODO добавить тесты на проверку:

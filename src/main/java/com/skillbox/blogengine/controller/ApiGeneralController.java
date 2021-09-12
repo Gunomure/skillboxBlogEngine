@@ -61,6 +61,7 @@ public class ApiGeneralController {
     @PostMapping(path = "/image", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     @PreAuthorize("hasAnyAuthority({'user:write', 'user:moderate'})")
     public String uploadImage(Principal principal, @ModelAttribute("image") ImageData image) {
+        // TODO возвращать error если файл слишком большой + тест на это
         LOGGER.info("user: {}", principal.getName());
         LOGGER.info("uploadImage: {}", image.getImage().getOriginalFilename());
         return generalService.saveImage(image);

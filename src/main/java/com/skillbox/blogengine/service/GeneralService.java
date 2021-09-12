@@ -1,5 +1,6 @@
 package com.skillbox.blogengine.service;
 
+import com.skillbox.blogengine.controller.exception.BadRequestException;
 import com.skillbox.blogengine.dto.ImageData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,6 +12,8 @@ import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -26,11 +29,16 @@ public class GeneralService {
         String extension = originalFileName.substring(originalFileName.lastIndexOf(".") + 1);
         if (!extension.equals("jpg") && !extension.equals("png")) {
             LOGGER.error("Got error with image {}. Image extension shoud be jpg or png", originalFileName);
-            throw new IllegalArgumentException("Image extension shoud be jpg or png");
+            BadRequestException exception = new BadRequestException("Wrong image extension");
+            exception.addErrorDescription("image", "Неправильное разрешение файла. Ожидается jpg или png.");
+            throw exception;
+
         }
         if (image.getImage().getSize() > FILE_MAX_WEIGHT) {
             LOGGER.error("Got error with image {}. Weight is more than expected.", originalFileName);
-            throw new IllegalArgumentException(String.format("Image shoud wegh less than %d", FILE_MAX_WEIGHT));
+            BadRequestException exception = new BadRequestException("Wrong image weight");
+            exception.addErrorDescription("image", "Размер файла превышает допустимый размер");
+            throw exception;
         }
         Path uniquePath = generateFilePath(originalFileName);
         Path currentPath = FileSystems.getDefault().getPath("").toAbsolutePath();
