@@ -6,6 +6,7 @@ import lombok.Data;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -62,9 +63,10 @@ public class Post {
     private Set<PostVote> postVotes;
 
     public void setTags(List<Tag> tagsToSet) {
-        if (this.tagToPost != null) {
-            this.tagToPost.clear();
+        if (this.tagToPost == null) {
+            this.tagToPost = new HashSet<>();
         }
+        this.tagToPost.clear();
         for (Tag tag : tagsToSet) {
             TagToPost tagToPost = new TagToPost();
             tagToPost.setPost(this);

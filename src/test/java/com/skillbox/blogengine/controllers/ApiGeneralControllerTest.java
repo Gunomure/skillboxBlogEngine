@@ -3,6 +3,7 @@ package com.skillbox.blogengine.controllers;
 import com.skillbox.blogengine.controller.exception.BadRequestException;
 import com.skillbox.blogengine.controller.exception.EntityNotFoundException;
 import com.skillbox.blogengine.dto.*;
+import com.skillbox.blogengine.dto.enums.ModerationStatusRequest;
 import com.skillbox.blogengine.model.CaptchaCode;
 import com.skillbox.blogengine.model.Post;
 import com.skillbox.blogengine.model.enums.ModerationStatus;
@@ -768,7 +769,7 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
 
         PostStatusModerationData moderationData = new PostStatusModerationData();
         moderationData.setPostId(1);
-        moderationData.setDecision(ModerationStatus.DECLINED);
+        moderationData.setDecision(ModerationStatusRequest.decline);
         String moderationDataJson = mapper.writeValueAsString(moderationData);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/login")
@@ -790,7 +791,7 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void moderationByWringUserShouldReturnErrorTest() throws Exception {
+    void moderationByWrongUserShouldReturnErrorTest() throws Exception {
         when(principal.getName()).thenReturn("test2@mail.ru");
 
         LoginData loginData = new LoginData();

@@ -4,6 +4,7 @@ import com.skillbox.blogengine.controller.exception.EntityNotFoundException;
 import com.skillbox.blogengine.controller.exception.SimpleException;
 import com.skillbox.blogengine.dto.*;
 import com.skillbox.blogengine.dto.enums.ModeType;
+import com.skillbox.blogengine.dto.enums.ModerationStatusRequest;
 import com.skillbox.blogengine.model.enums.ModerationStatus;
 import com.skillbox.blogengine.model.Post;
 import com.skillbox.blogengine.model.Tag;
@@ -217,8 +218,14 @@ public class PostService {
         } else if (!postRepository.existsById(moderationData.getPostId())) {
             throw new SimpleException(String.format("Post %d does not exist", moderationData.getPostId()));
         }
+
         Post post = postRepository.findPostById(moderationData.getPostId());
-        post.setModerationStatus(moderationData.getDecision());
+        if (moderationData.getDecision().equals(ModerationStatusRequest.accept)) {
+            post.setModerationStatus(ModerationStatus.ACCEPTED);
+        } else {
+            post.setModerationStatus(ModerationStatus.DECLINED);
+        }
+
         postRepository.save(post);
     }
 

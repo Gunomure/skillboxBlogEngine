@@ -4,6 +4,7 @@ import com.skillbox.blogengine.model.Post;
 import com.skillbox.blogengine.model.custom.PostUserCounts;
 import com.skillbox.blogengine.model.custom.PostWithComments;
 import com.skillbox.blogengine.model.custom.PostsCountPerDate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -139,7 +140,6 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             " LEFT JOIN p.author a" +
             " LEFT JOIN p.postVotes pv" +
             " WHERE p.isActive = TRUE AND p.moderationStatus = 'NEW'" +
-            "     AND a.id = :userId" +
             " GROUP BY p.id, pc.post, pv.post")
     List<PostUserCounts> findPendingPosts(int userId, Pageable pageable);
 
@@ -158,7 +158,7 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             " LEFT JOIN p.author a" +
             " LEFT JOIN p.postVotes pv" +
             " WHERE p.isActive = TRUE AND p.moderationStatus = 'DECLINED'" +
-            "     AND a.id = :userId" +
+            "     AND p.moderator.id = :userId" +
             " GROUP BY p.id, pc.post, pv.post")
     List<PostUserCounts> findDeclinedPosts(int userId, Pageable pageable);
 
@@ -177,7 +177,10 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             " LEFT JOIN p.author a" +
             " LEFT JOIN p.postVotes pv" +
             " WHERE p.isActive = TRUE AND p.moderationStatus = 'ACCEPTED'" +
-            "     AND a.id = :userId" +
+            "     AND p.moderator.id = :userId" +
             " GROUP BY p.id, pc.post, pv.post")
     List<PostUserCounts> findPublishedPosts(int userId, Pageable pageable);
+
+    @Query("SELECT COUNT(*) FROM Post p WHERE p.moderationStatus = 'NEW' AND p.isActive = TRUE AND p.moderator is NULL")
+    int findPostsNeedToModerate();
 }
