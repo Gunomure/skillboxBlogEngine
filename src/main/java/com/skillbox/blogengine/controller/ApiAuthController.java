@@ -69,10 +69,4 @@ public class ApiAuthController {
     public SimpleResponse postRegister(@RequestBody UserRegisterData userRegisterData) {
         return registerService.registerUser(userRegisterData);
     }
-
-    // TODO реализовать
-    @PostMapping("/api/profile/my")
-    public SimpleResponse updateProfile(Principal principal, @RequestBody UserRegisterData userRegisterData) {
-        return new SimpleResponse();
-    }
 }

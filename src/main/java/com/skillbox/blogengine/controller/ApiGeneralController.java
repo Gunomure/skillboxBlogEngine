@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 import java.time.LocalDate;
@@ -78,5 +79,29 @@ public class ApiGeneralController {
         LOGGER.info("Make decision for post {}", moderationData.getPostId());
         postService.moderatePost(moderationData, principal.getName());
         return new SimpleResponse(true);
+    }
+
+    @PostMapping("/profile/my")
+    @PreAuthorize("hasAnyAuthority({'user:write', 'user:moderate'})")
+    public SimpleResponse updateProfile(Principal principal, @RequestBody ProfileData profileData) {
+        LOGGER.info("updateProfile");
+        generalService.updateProfile(principal.getName(), profileData);
+        return new SimpleResponse();
+    }
+
+    @PostMapping(value = "/profile/my", produces = {MediaType.APPLICATION_JSON_VALUE},
+            consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @ResponseBody
+    @PreAuthorize("hasAnyAuthority({'user:write', 'user:moderate'})")
+    public SimpleResponse updateProfile(Principal principal,
+                                        @RequestParam("name") String name,
+                                        @RequestParam("email") String email,
+                                        @RequestParam("removePhoto") boolean removePhoto,
+                                        @RequestParam(value = "password", defaultValue = "") String password,
+                                        @RequestParam("photo") MultipartFile photo) {
+        LOGGER.info("updateProfile2");
+        ProfileData profileData = new ProfileData(email, name, password.isEmpty() ? null : password, removePhoto, null);
+        generalService.updateProfile(principal.getName(), profileData, photo);
+        return new SimpleResponse();
     }
 }
