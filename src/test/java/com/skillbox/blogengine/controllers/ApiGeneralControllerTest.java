@@ -9,6 +9,7 @@ import com.skillbox.blogengine.model.Post;
 import com.skillbox.blogengine.model.enums.ModerationStatus;
 import com.skillbox.blogengine.orm.CaptchaRepository;
 import com.skillbox.blogengine.orm.PostRepository;
+import com.skillbox.blogengine.service.EmailSender;
 import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.Customization;
@@ -37,6 +38,8 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
     CaptchaRepository captchaRepository;
     @Autowired
     private PostRepository postRepository;
+    @Autowired
+    EmailSender emailSender;
     @Value("${blog_engine.additional.uploadedMaxFileWeight}")
     private int FILE_MAX_WEIGHT;
 
@@ -810,6 +813,19 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(print())
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testtest() throws Exception {
+        RestorePasswordData passwordData = new RestorePasswordData("moder@mail.ru");
+        String passwordDataJson = mapper.writeValueAsString(passwordData);
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/restore")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(passwordDataJson)
+                ).andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
     }
     /**
      * TODO добавить тесты на проверку:

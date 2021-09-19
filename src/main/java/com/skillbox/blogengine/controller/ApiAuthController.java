@@ -3,6 +3,7 @@ package com.skillbox.blogengine.controller;
 import com.skillbox.blogengine.controller.exception.UserNotAuthorizedException;
 import com.skillbox.blogengine.dto.*;
 import com.skillbox.blogengine.service.CaptchaService;
+import com.skillbox.blogengine.service.EmailSender;
 import com.skillbox.blogengine.service.RegisterService;
 import com.skillbox.blogengine.service.UserService;
 import org.apache.logging.log4j.LogManager;
@@ -24,11 +25,13 @@ public class ApiAuthController {
     private final UserService userService;
     private final CaptchaService captchaService;
     private final RegisterService registerService;
+    private final EmailSender emailSender;
 
-    public ApiAuthController(UserService userService, CaptchaService captchaService, RegisterService registerService) {
+    public ApiAuthController(UserService userService, CaptchaService captchaService, RegisterService registerService, EmailSender emailSender) {
         this.userService = userService;
         this.captchaService = captchaService;
         this.registerService = registerService;
+        this.emailSender = emailSender;
     }
 
     @PostMapping("/login")
@@ -68,5 +71,12 @@ public class ApiAuthController {
     @PostMapping("/register")
     public SimpleResponse postRegister(@RequestBody UserRegisterData userRegisterData) {
         return registerService.registerUser(userRegisterData);
+    }
+
+    @PostMapping("/restore")
+    public SimpleResponse restorePassword(@RequestBody RestorePasswordData passwordData) {
+        LOGGER.info("!!! send email");
+        emailSender.sendSimpleMessage("tyunyaevds1@gmail.com", "subject", "some text");
+        return new SimpleResponse();
     }
 }
