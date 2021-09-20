@@ -61,8 +61,7 @@ public class ApiGeneralController {
     @PostMapping(path = "/image", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     @PreAuthorize("hasAnyAuthority({'user:write', 'user:moderate'})")
     public String uploadImage(Principal principal, @ModelAttribute("image") ImageData image) {
-        LOGGER.info("user: {}", principal.getName());
-        LOGGER.info("uploadImage: {}", image.getImage().getOriginalFilename());
+        LOGGER.info("upload image: {}", image.getImage().getOriginalFilename());
         return generalService.saveImage(image);
     }
 
@@ -84,7 +83,7 @@ public class ApiGeneralController {
     @PostMapping("/profile/my")
     @PreAuthorize("hasAnyAuthority({'user:write', 'user:moderate'})")
     public SimpleResponse updateProfile(Principal principal, @RequestBody ProfileData profileData) {
-        LOGGER.info("updateProfile");
+        LOGGER.info("Update profile for user: {}", principal.getName());
         generalService.updateProfile(principal.getName(), profileData);
         return new SimpleResponse();
     }
@@ -99,7 +98,7 @@ public class ApiGeneralController {
                                         @RequestParam("removePhoto") boolean removePhoto,
                                         @RequestParam(value = "password", defaultValue = "") String password,
                                         @RequestParam("photo") MultipartFile photo) {
-        LOGGER.info("updateProfile2");
+        LOGGER.info("Update profile with image for user: {}", principal.getName());
         ProfileData profileData = new ProfileData(email, name, password.isEmpty() ? null : password, removePhoto, null);
         generalService.updateProfile(principal.getName(), profileData, photo);
         return new SimpleResponse();

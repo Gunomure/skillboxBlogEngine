@@ -16,6 +16,7 @@
     <properties>
         <java.version>11</java.version>
         <flyway.version>5.2.1</flyway.version>
+        <cloudinary.version>1.29.0</cloudinary.version>
     </properties>
     <dependencies>
         <dependency>
@@ -142,6 +143,20 @@
 <!--            <version>5.5.2</version>-->
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.cloudinary/cloudinary-core -->
+        <dependency>
+            <groupId>com.cloudinary</groupId>
+            <artifactId>cloudinary-core</artifactId>
+            <version>${cloudinary.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.cloudinary/cloudinary-http44 -->
+        <dependency>
+            <groupId>com.cloudinary</groupId>
+            <artifactId>cloudinary-http44</artifactId>
+            <version>${cloudinary.version}</version>
+        </dependency>
+
+
 
     </dependencies>
 

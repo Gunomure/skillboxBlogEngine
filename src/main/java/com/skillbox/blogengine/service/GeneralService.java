@@ -12,11 +12,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -27,6 +26,7 @@ public class GeneralService {
     private final static Logger LOGGER = LogManager.getLogger(CaptchaService.class);
 
     private final UserRepository userRepository;
+    private final CloudinaryService cloudinaryService;
     private final PasswordEncoder encoder;
 
     private static final String rootFolder = "/upload";
@@ -35,8 +35,9 @@ public class GeneralService {
     @Value("${blog_engine.additional.passwordMinLength}")
     private int PASSWORD_MIN_LENGTH;
 
-    public GeneralService(UserRepository userRepository, PasswordEncoder encoder) {
+    public GeneralService(UserRepository userRepository, CloudinaryService cloudinaryService, PasswordEncoder encoder) {
         this.userRepository = userRepository;
+        this.cloudinaryService = cloudinaryService;
         this.encoder = encoder;
     }
 
@@ -45,6 +46,7 @@ public class GeneralService {
     }
 
     private String saveImage(MultipartFile image, boolean cut) {
+        String savedImageUrl;
         String originalFileName = image.getOriginalFilename();
         String extension = originalFileName.substring(originalFileName.lastIndexOf(".") + 1);
         if (!extension.equals("jpg") && !extension.equals("png")) {
@@ -60,39 +62,32 @@ public class GeneralService {
             exception.addErrorDescription("photo", "Размер файла превышает допустимый размер 5Мб");
             throw exception;
         }
-        Path uniquePath = generateFilePath(originalFileName);
+
+        Path uniquePath = generateFilePath();
         Path currentPath = FileSystems.getDefault().getPath("").toAbsolutePath();
-        Path fullPath = Path.of(currentPath.toString(), uniquePath.toString());
+        Path fullPath = Path.of(currentPath.toString(), uniquePath.toString(), originalFileName);
+        savedImageUrl = fullPath.toString();
         LOGGER.info("Save image to path: {}", fullPath);
         fullPath.getParent().toFile().mkdirs();
         try {
-            if (cut) {
-                LOGGER.info("cut image");
-                BufferedImage bufferedImage = ImageIO.read(image.getInputStream());
-                BufferedImage subImage = bufferedImage.getSubimage(0, 0,
-                        Math.min(bufferedImage.getWidth(), 36),
-                        Math.min(bufferedImage.getHeight(), 36));
-                LOGGER.info("save image");
-                File outputfile = new File(fullPath.toString());
-                ImageIO.write(subImage, extension, outputfile);
-            } else {
-                image.transferTo(new File(fullPath.toString()));
-            }
+            image.transferTo(new File(fullPath.toString()));
+            savedImageUrl = cloudinaryService.uploadImage(fullPath.toString(), uniquePath.toString(), cut);
+            Files.delete(fullPath); //после загрузки файла в облако, освобождаем место на диске
         } catch (IOException e) {
             LOGGER.error("Got error while saving image {} to path {}", originalFileName, fullPath.toString(), e);
         }
+        LOGGER.info("Image has been saved into cloudinary, url:\n" + savedImageUrl);
 
-        return fullPath.toString();
+        return savedImageUrl;
     }
 
-    private Path generateFilePath(String fileName) {
+    private Path generateFilePath() {
         // пример: 123e4567-e89b-42d3-a456-556642440000
         String[] pathParts = UUID.randomUUID().toString().split("-");
         Path path = Paths.get(rootFolder);
         for (int i = 0; i < 3; i++) {
             path = path.resolve(pathParts[i]);
         }
-        path = path.resolve(fileName);
 
         return path;
     }

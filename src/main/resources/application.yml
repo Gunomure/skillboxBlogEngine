@@ -27,7 +27,6 @@ spring:
       mail.smtp.starttls.enable: true
       mail.debug: true
       mail.smtp.timeout: 10000
-
   #logging:
 #  level:
 #    org:
@@ -46,3 +45,9 @@ blog_engine:
     uploadedMaxFileWeight: 5242880 # TODO разделить файл для комментов и файл для профиля?
     commentMinLength: 3
     passwordMinLength: 6
+    profilePhotoWidth: 36
+    profilePhotoHeight: 36
+  cloudinary:
+    cloudName: skillbox
+    apiKey:
+    apiSecret:
