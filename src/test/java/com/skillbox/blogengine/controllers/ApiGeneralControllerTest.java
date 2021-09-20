@@ -814,6 +814,19 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
                 ).andDo(print())
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void testtest() throws Exception {
+        RestorePasswordData passwordData = new RestorePasswordData("dtyunyaev94@mail.ru");
+        String passwordDataJson = mapper.writeValueAsString(passwordData);
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/restore")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(passwordDataJson)
+                ).andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+    }
     /**
      * TODO добавить тесты на проверку:
      *

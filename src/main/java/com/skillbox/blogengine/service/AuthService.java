@@ -1,5 +1,6 @@
 package com.skillbox.blogengine.service;
 
+import com.skillbox.blogengine.controller.exception.SimpleException;
 import com.skillbox.blogengine.dto.ErrorResponse;
 import com.skillbox.blogengine.dto.SimpleResponse;
 import com.skillbox.blogengine.dto.UserRegisterData;
@@ -14,17 +15,20 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
-public class RegisterService {
-    private final static Logger LOGGER = LogManager.getLogger(RegisterService.class);
+public class AuthService {
+    private final static Logger LOGGER = LogManager.getLogger(AuthService.class);
 
     private final UserRepository userRepository;
     private final CaptchaRepository captchaRepository;
+    private final EmailSender emailSender;
 
-    public RegisterService(UserRepository userRepository, CaptchaRepository captchaRepository) {
+    public AuthService(UserRepository userRepository, CaptchaRepository captchaRepository, EmailSender emailSender) {
         this.userRepository = userRepository;
         this.captchaRepository = captchaRepository;
+        this.emailSender = emailSender;
     }
 
     public SimpleResponse registerUser(UserRegisterData user) {
@@ -61,5 +65,15 @@ public class RegisterService {
             }
             return registerResponse;
         }
+    }
+
+    public void sendRestoreEmail(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new SimpleException(String.format("User %s not found", email)));
+        String uuid = UUID.randomUUID().toString();
+        user.setCode(uuid);
+        userRepository.save(user);
+        emailSender.sendSimpleMessage(email, "Restore password", String.format("/login/change-password/%s", uuid));
+
     }
 }

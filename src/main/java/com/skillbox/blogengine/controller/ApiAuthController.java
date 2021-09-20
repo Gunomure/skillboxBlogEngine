@@ -4,7 +4,7 @@ import com.skillbox.blogengine.controller.exception.UserNotAuthorizedException;
 import com.skillbox.blogengine.dto.*;
 import com.skillbox.blogengine.service.CaptchaService;
 import com.skillbox.blogengine.service.EmailSender;
-import com.skillbox.blogengine.service.RegisterService;
+import com.skillbox.blogengine.service.AuthService;
 import com.skillbox.blogengine.service.UserService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,13 +24,13 @@ public class ApiAuthController {
 
     private final UserService userService;
     private final CaptchaService captchaService;
-    private final RegisterService registerService;
+    private final AuthService authService;
     private final EmailSender emailSender;
 
-    public ApiAuthController(UserService userService, CaptchaService captchaService, RegisterService registerService, EmailSender emailSender) {
+    public ApiAuthController(UserService userService, CaptchaService captchaService, AuthService authService, EmailSender emailSender) {
         this.userService = userService;
         this.captchaService = captchaService;
-        this.registerService = registerService;
+        this.authService = authService;
         this.emailSender = emailSender;
     }
 
@@ -70,13 +70,14 @@ public class ApiAuthController {
 
     @PostMapping("/register")
     public SimpleResponse postRegister(@RequestBody UserRegisterData userRegisterData) {
-        return registerService.registerUser(userRegisterData);
+        return authService.registerUser(userRegisterData);
     }
 
     @PostMapping("/restore")
-    public SimpleResponse restorePassword(@RequestBody RestorePasswordData passwordData) {
-        LOGGER.info("!!! send email");
-        emailSender.sendSimpleMessage("tyunyaevds1@gmail.com", "subject", "some text");
+    public SimpleResponse restorePassword(@RequestBody RestorePasswordData restoreData) {
+        LOGGER.info("Send email to {}", restoreData.getEmail());
+//        emailSender.sendSimpleMessage("dtyunyaev94@mail.ru", "subject", "some text");
+        authService.sendRestoreEmail(restoreData.getEmail());
         return new SimpleResponse();
     }
 }
