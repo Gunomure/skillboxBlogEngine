@@ -86,8 +86,7 @@ public class ApiAuthController {
     @PostMapping("/restore")
     public SimpleResponse restorePassword(@RequestBody RestorePasswordData restoreData) {
         LOGGER.info("Send email to {}", restoreData.getEmail());
-//        emailSender.sendSimpleMessage("dtyunyaev94@mail.ru", "subject", "some text");
         authService.sendRestoreEmail(restoreData.getEmail());
-        return new SimpleResponse();
+        return new SimpleResponse(true);
     }
 }

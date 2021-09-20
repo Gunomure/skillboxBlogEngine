@@ -47,6 +47,7 @@ blog_engine:
     passwordMinLength: 6
     profilePhotoWidth: 36
     profilePhotoHeight: 36
+    websiteHost: localhost
   cloudinary:
     cloudName: skillbox
     apiKey:

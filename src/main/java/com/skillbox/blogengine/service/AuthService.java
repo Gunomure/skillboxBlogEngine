@@ -12,6 +12,7 @@ import com.skillbox.blogengine.orm.UserRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -26,6 +27,10 @@ public class AuthService {
     private final CaptchaRepository captchaRepository;
     private final SecurityConfig securityConfig;
     private final EmailSender emailSender;
+
+    @Value("${blog_engine.additional.websiteHost}")
+    private String WEBSITE_HOST;
+    private final static String EMAIL_TEMPLATE = "http://%s:8080/login/change-password/%s";
 
     public AuthService(UserRepository userRepository, CaptchaRepository captchaRepository, SecurityConfig securityConfig, EmailSender emailSender) {
         this.userRepository = userRepository;
@@ -71,12 +76,12 @@ public class AuthService {
     }
 
     public void sendRestoreEmail(String email) {
+        LOGGER.info("fiend by {}", email);
         User user = userRepository.findByEmail(email).orElseThrow(
                 () -> new SimpleException(String.format("User %s not found", email)));
-        String uuid = UUID.randomUUID().toString();
+        String uuid = UUID.randomUUID().toString().replace("-", "");
         user.setCode(uuid);
         userRepository.save(user);
-        emailSender.sendSimpleMessage(email, "Restore password", String.format("/login/change-password/%s", uuid));
-
+        emailSender.sendSimpleMessage(email, "Restore password", String.format(EMAIL_TEMPLATE, WEBSITE_HOST, uuid));
     }
 }
