@@ -1,6 +1,7 @@
 package com.skillbox.blogengine.service;
 
 import com.skillbox.blogengine.controller.exception.SimpleException;
+import com.skillbox.blogengine.config.SecurityConfig;
 import com.skillbox.blogengine.dto.ErrorResponse;
 import com.skillbox.blogengine.dto.SimpleResponse;
 import com.skillbox.blogengine.dto.UserRegisterData;
@@ -23,11 +24,13 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final CaptchaRepository captchaRepository;
+    private final SecurityConfig securityConfig;
     private final EmailSender emailSender;
 
-    public AuthService(UserRepository userRepository, CaptchaRepository captchaRepository, EmailSender emailSender) {
+    public AuthService(UserRepository userRepository, CaptchaRepository captchaRepository, SecurityConfig securityConfig, EmailSender emailSender) {
         this.userRepository = userRepository;
         this.captchaRepository = captchaRepository;
+        this.securityConfig = securityConfig;
         this.emailSender = emailSender;
     }
 
@@ -44,7 +47,7 @@ public class AuthService {
             newUser.setRegTime(LocalDateTime.now());
             newUser.setName(user.getName());
             newUser.setEmail(user.getEmail());
-            newUser.setPassword(user.getPassword());
+            newUser.setPassword(securityConfig.passwordEncoder().encode(user.getPassword()));
             userRepository.save(newUser);
             return new SimpleResponse(true);
         } else {
