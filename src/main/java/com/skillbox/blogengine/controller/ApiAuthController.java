@@ -89,4 +89,11 @@ public class ApiAuthController {
         authService.sendRestoreEmail(restoreData.getEmail());
         return new SimpleResponse(true);
     }
+
+    @PostMapping("/password")
+    public SimpleResponse updatePassword(@RequestBody PasswordUpdateData passwordUpdateData) {
+        authService.updatePassword(passwordUpdateData);
+
+        return new SimpleResponse(true);
+    }
 }
