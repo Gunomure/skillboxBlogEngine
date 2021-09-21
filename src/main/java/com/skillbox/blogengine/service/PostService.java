@@ -7,6 +7,7 @@ import com.skillbox.blogengine.dto.*;
 import com.skillbox.blogengine.dto.enums.ModeType;
 import com.skillbox.blogengine.dto.enums.ModerationStatusRequest;
 import com.skillbox.blogengine.model.Post;
+import com.skillbox.blogengine.model.PostVote;
 import com.skillbox.blogengine.model.Tag;
 import com.skillbox.blogengine.model.User;
 import com.skillbox.blogengine.model.custom.CommentUserInfo;
@@ -14,10 +15,7 @@ import com.skillbox.blogengine.model.custom.PostUserCounts;
 import com.skillbox.blogengine.model.custom.PostWithComments;
 import com.skillbox.blogengine.model.custom.PostsCountPerDate;
 import com.skillbox.blogengine.model.enums.ModerationStatus;
-import com.skillbox.blogengine.orm.PostCommentsRepository;
-import com.skillbox.blogengine.orm.PostRepository;
-import com.skillbox.blogengine.orm.TagRepository;
-import com.skillbox.blogengine.orm.UserRepository;
+import com.skillbox.blogengine.orm.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jsoup.Jsoup;
@@ -36,6 +34,7 @@ public class PostService {
 
     private final static Logger LOGGER = LogManager.getLogger(PostService.class);
     private final PostRepository postRepository;
+    private final PostVoteRepository postVoteRepository;
     private final PostCommentsRepository postCommentsRepository;
     private final TagRepository tagRepository;
     private final UserRepository userRepository;
@@ -43,8 +42,9 @@ public class PostService {
     @Value("${blog_engine.additional.announceMaxLength}")
     private int ANNOUNCE_MAX_LENGTH;
 
-    public PostService(PostRepository postRepository, PostCommentsRepository postCommentsRepository, TagRepository tagRepository, UserRepository userRepository) {
+    public PostService(PostRepository postRepository, PostVoteRepository postVoteRepository, PostCommentsRepository postCommentsRepository, TagRepository tagRepository, UserRepository userRepository) {
         this.postRepository = postRepository;
+        this.postVoteRepository = postVoteRepository;
         this.postCommentsRepository = postCommentsRepository;
         this.tagRepository = tagRepository;
         this.userRepository = userRepository;
@@ -323,5 +323,29 @@ public class PostService {
 
     public BlogStatisticsResponse getCommonStatistics() {
         return postRepository.findCommonStatistics();
+    }
+
+    public void likePost(PostVoteData voteData, String email) {
+        Post post = postRepository.findPostById(voteData.getPostId());
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new UserNotAuthorizedException(String.format("User %s not found", email)));
+
+
+        if (post == null) {
+            throw new SimpleException(String.format("Post %d not found", voteData.getPostId()));
+        }
+
+        boolean userAlreadyVoted = postVoteRepository.isUserVoted(post.getId(), user.getId());
+        LOGGER.info("user voted: {}", userAlreadyVoted);
+        if (userAlreadyVoted) {
+            return;
+        }
+
+        PostVote postVote = new PostVote();
+        postVote.setTime(LocalDateTime.now());
+        postVote.setPost(post);
+        postVote.setValue(true);
+        postVote.setUser(user);
+        postVoteRepository.save(postVote);
     }
 }

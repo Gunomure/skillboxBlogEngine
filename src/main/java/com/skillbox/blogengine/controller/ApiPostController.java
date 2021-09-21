@@ -103,4 +103,11 @@ public class ApiPostController {
         LOGGER.info(requestData.toString());
         return postService.updatePost(ID, requestData, principal.getName());
     }
+
+    @PostMapping("/post/like")
+    @PreAuthorize("hasAnyAuthority({'user:write', 'user:moderate'})")
+    public SimpleResponse likePost(Principal principal, @RequestBody PostVoteData voteData) {
+        postService.likePost(voteData, principal.getName());
+        return new SimpleResponse(true);
+    }
 }
