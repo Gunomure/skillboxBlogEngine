@@ -103,4 +103,10 @@ public class ApiGeneralController {
         generalService.updateProfile(principal.getName(), profileData, photo);
         return new SimpleResponse();
     }
+
+    @GetMapping("/statistics/my")
+    @PreAuthorize("hasAnyAuthority({'user:write', 'user:moderate'})")
+    public MyStatisticsResponse getMyStatistics(Principal principal) {
+        return generalService.getMyStatistics(principal.getName());
+    }
 }

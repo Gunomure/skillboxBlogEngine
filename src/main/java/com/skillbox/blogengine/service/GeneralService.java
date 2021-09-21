@@ -1,7 +1,9 @@
 package com.skillbox.blogengine.service;
 
 import com.skillbox.blogengine.controller.exception.BadRequestException;
+import com.skillbox.blogengine.controller.exception.UserNotAuthorizedException;
 import com.skillbox.blogengine.dto.ImageData;
+import com.skillbox.blogengine.dto.MyStatisticsResponse;
 import com.skillbox.blogengine.dto.ProfileData;
 import com.skillbox.blogengine.model.User;
 import com.skillbox.blogengine.orm.UserRepository;
@@ -126,5 +128,11 @@ public class GeneralService {
         String imagePath = saveImage(image, true);
         user.setPhoto(imagePath);
         userRepository.save(user);
+    }
+
+    public MyStatisticsResponse getMyStatistics(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new UserNotAuthorizedException(String.format("User %s not found", email)));
+        return userRepository.findMyStatistics(user.getId());
     }
 }
