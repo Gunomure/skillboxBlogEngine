@@ -21,7 +21,7 @@ public class PostVote {
     private LocalDateTime time;
     @NotNull
     @Column(columnDefinition = "TINYINT COMMENT 'лайк или дизлайк: 1 или -1'")
-    private boolean value;
+    private int value;
 
     @NotNull
     @ManyToOne

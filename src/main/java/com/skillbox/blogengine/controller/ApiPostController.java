@@ -107,7 +107,14 @@ public class ApiPostController {
     @PostMapping("/post/like")
     @PreAuthorize("hasAnyAuthority({'user:write', 'user:moderate'})")
     public SimpleResponse likePost(Principal principal, @RequestBody PostVoteData voteData) {
-        postService.likePost(voteData, principal.getName());
+        postService.votePost(voteData, principal.getName(), true);
+        return new SimpleResponse(true);
+    }
+
+    @PostMapping("/post/dislike")
+    @PreAuthorize("hasAnyAuthority({'user:write', 'user:moderate'})")
+    public SimpleResponse dislikePost(Principal principal, @RequestBody PostVoteData voteData) {
+        postService.votePost(voteData, principal.getName(), false);
         return new SimpleResponse(true);
     }
 }

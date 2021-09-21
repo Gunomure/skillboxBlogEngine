@@ -1,12 +1,9 @@
 package com.skillbox.blogengine.orm;
 
-import com.skillbox.blogengine.model.Post;
 import com.skillbox.blogengine.model.PostVote;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
 
 @Repository
 public interface PostVoteRepository extends JpaRepository<PostVote, Integer> {

@@ -325,7 +325,7 @@ public class PostService {
         return postRepository.findCommonStatistics();
     }
 
-    public void likePost(PostVoteData voteData, String email) {
+    public void votePost(PostVoteData voteData, String email, boolean like) {
         Post post = postRepository.findPostById(voteData.getPostId());
         User user = userRepository.findByEmail(email).orElseThrow(
                 () -> new UserNotAuthorizedException(String.format("User %s not found", email)));
@@ -338,13 +338,13 @@ public class PostService {
         boolean userAlreadyVoted = postVoteRepository.isUserVoted(post.getId(), user.getId());
         LOGGER.info("user voted: {}", userAlreadyVoted);
         if (userAlreadyVoted) {
-            return;
+            throw new SimpleException(String.format("User %s has already voted", email));
         }
 
         PostVote postVote = new PostVote();
         postVote.setTime(LocalDateTime.now());
         postVote.setPost(post);
-        postVote.setValue(true);
+        postVote.setValue(like ? 1 : -1);
         postVote.setUser(user);
         postVoteRepository.save(postVote);
     }
