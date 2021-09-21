@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class GlobalSettingsResponse {
+public class GlobalSettingsData {
 
     @JsonProperty("MULTIUSER_MODE")
     private boolean multiuserMode;

@@ -39,7 +39,7 @@ public class ApiGeneralController {
     }
 
     @GetMapping("/settings")
-    public GlobalSettingsResponse settings() {
+    public GlobalSettingsData settings() {
         return settingsService.selectAll();
     }
 
@@ -113,5 +113,11 @@ public class ApiGeneralController {
     @GetMapping("/statistics/all")
     public BlogStatisticsResponse getCommonStatistics() {
         return postService.getCommonStatistics();
+    }
+
+    @PutMapping("/settings")
+    @PreAuthorize("hasAnyAuthority({'user:write', 'user:moderate'})")
+    public void settings(Principal principal, @RequestBody GlobalSettingsData globalSettingsData) {
+        settingsService.updateGlobalSettings(globalSettingsData, principal.getName());
     }
 }
