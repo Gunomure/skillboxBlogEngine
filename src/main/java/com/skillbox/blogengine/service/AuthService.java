@@ -92,26 +92,25 @@ public class AuthService {
     }
 
     public void updatePassword(PasswordUpdateData passwordUpdateData) {
-        User user = userRepository.findByCode(passwordUpdateData.getCode()).orElseThrow(
-                () -> new EntityNotFoundException("User not found"));
+        Optional<User> user = userRepository.findByCode(passwordUpdateData.getCode());
         CaptchaCode captchaCode = captchaRepository.findCaptchaCodeBySecretCode(passwordUpdateData.getCaptchaSecret());
 
-        BadRequestException exception = new BadRequestException("");
-        if (!user.getCode().equals(passwordUpdateData.getCode())) {
+        BadRequestException exception = new BadRequestException("Error while checking data for restore password");
+        if (!user.isPresent() || !user.get().getCode().equals(passwordUpdateData.getCode())) {
             exception.addErrorDescription("code", "Ссылка для восстановления пароля устарела." +
-                            "<a href= \"/auth/restore\">Запросить ссылку снова</a>");
+                            "<a href= \"/login/restore-password\">Запросить ссылку снова</a>");
         }
         if (passwordUpdateData.getPassword().length() < 6) {
             exception.addErrorDescription("password", "Пароль короче 6-ти символов");
         }
-        if (!captchaCode.getSecretCode().equals(passwordUpdateData.getCaptchaSecret())) {
+        if (!captchaCode.getCode().equals(passwordUpdateData.getCaptcha())) {
             exception.addErrorDescription("captcha", "Код с картинки введён неверно");
         }
         if (!exception.getErrorsDescription().isEmpty()) {
             throw exception;
         }
 
-        user.setPassword(encoder.encode(passwordUpdateData.getPassword()));
-        userRepository.save(user);
+        user.get().setPassword(encoder.encode(passwordUpdateData.getPassword()));
+        userRepository.save(user.get());
     }
 }
