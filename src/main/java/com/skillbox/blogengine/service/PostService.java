@@ -2,10 +2,10 @@ package com.skillbox.blogengine.service;
 
 import com.skillbox.blogengine.controller.exception.EntityNotFoundException;
 import com.skillbox.blogengine.controller.exception.SimpleException;
+import com.skillbox.blogengine.controller.exception.UserNotAuthorizedException;
 import com.skillbox.blogengine.dto.*;
 import com.skillbox.blogengine.dto.enums.ModeType;
 import com.skillbox.blogengine.dto.enums.ModerationStatusRequest;
-import com.skillbox.blogengine.model.enums.ModerationStatus;
 import com.skillbox.blogengine.model.Post;
 import com.skillbox.blogengine.model.Tag;
 import com.skillbox.blogengine.model.User;
@@ -13,6 +13,7 @@ import com.skillbox.blogengine.model.custom.CommentUserInfo;
 import com.skillbox.blogengine.model.custom.PostUserCounts;
 import com.skillbox.blogengine.model.custom.PostWithComments;
 import com.skillbox.blogengine.model.custom.PostsCountPerDate;
+import com.skillbox.blogengine.model.enums.ModerationStatus;
 import com.skillbox.blogengine.orm.PostCommentsRepository;
 import com.skillbox.blogengine.orm.PostRepository;
 import com.skillbox.blogengine.orm.TagRepository;
@@ -312,5 +313,15 @@ public class PostService {
 
         return new PostResponse.PostInfo(post.getId(), post.getTimestamp(), new PostResponse.PostInfo.UserInfo(post.getUserId(), post.getUserName()),
                 post.getTitle(), announceWithoutTags, post.getLikeCount(), post.getDislikeCount(), post.getCommentCount(), post.getViewCount());
+    }
+
+    public BlogStatisticsResponse getMyStatistics(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new UserNotAuthorizedException(String.format("User %s not found", email)));
+        return postRepository.findMyStatistics(user.getId());
+    }
+
+    public BlogStatisticsResponse getCommonStatistics() {
+        return postRepository.findCommonStatistics();
     }
 }

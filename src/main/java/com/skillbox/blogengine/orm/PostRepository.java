@@ -1,10 +1,10 @@
 package com.skillbox.blogengine.orm;
 
+import com.skillbox.blogengine.dto.BlogStatisticsResponse;
 import com.skillbox.blogengine.model.Post;
 import com.skillbox.blogengine.model.custom.PostUserCounts;
 import com.skillbox.blogengine.model.custom.PostWithComments;
 import com.skillbox.blogengine.model.custom.PostsCountPerDate;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -183,4 +183,25 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
 
     @Query("SELECT COUNT(*) FROM Post p WHERE p.moderationStatus = 'NEW' AND p.isActive = TRUE AND p.moderator is NULL")
     int findPostsNeedToModerate();
+
+    @Query("SELECT new com.skillbox.blogengine.dto.BlogStatisticsResponse(" +
+            "  COUNT(p.id)                             AS postsCount" +
+            " ,COUNT(CASE pv.value WHEN 1 THEN 1 END)  AS likeCount" +
+            " ,COUNT(CASE pv.value WHEN -1 THEN 1 END) AS dislikeCount" +
+            " ,SUM(p.viewCount)                        AS viewsCount" +
+            " ,MIN(UNIX_TIMESTAMP(p.time))             AS firstPublication)" +
+            " FROM Post p" +
+            " LEFT JOIN p.postVotes pv" +
+            " WHERE p.author.id = :userId")
+    BlogStatisticsResponse findMyStatistics(int userId);
+
+    @Query("SELECT new com.skillbox.blogengine.dto.BlogStatisticsResponse(" +
+            "  COUNT(distinct p.id)                    AS postsCount" +
+            " ,COUNT(CASE pv.value WHEN 1 THEN 1 END)  AS likeCount" +
+            " ,COUNT(CASE pv.value WHEN -1 THEN 1 END) AS dislikeCount" +
+            " ,SUM(p.viewCount)                        AS viewsCount" +
+            " ,MIN(UNIX_TIMESTAMP(p.time))             AS firstPublication)" +
+            " FROM Post p" +
+            " LEFT JOIN p.postVotes pv")
+    BlogStatisticsResponse findCommonStatistics();
 }

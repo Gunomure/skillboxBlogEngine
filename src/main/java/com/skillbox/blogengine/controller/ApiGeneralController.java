@@ -106,7 +106,12 @@ public class ApiGeneralController {
 
     @GetMapping("/statistics/my")
     @PreAuthorize("hasAnyAuthority({'user:write', 'user:moderate'})")
-    public MyStatisticsResponse getMyStatistics(Principal principal) {
-        return generalService.getMyStatistics(principal.getName());
+    public BlogStatisticsResponse getMyStatistics(Principal principal) {
+        return postService.getMyStatistics(principal.getName());
+    }
+
+    @GetMapping("/statistics/all")
+    public BlogStatisticsResponse getCommonStatistics() {
+        return postService.getCommonStatistics();
     }
 }

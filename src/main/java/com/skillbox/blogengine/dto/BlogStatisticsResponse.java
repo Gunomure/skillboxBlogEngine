@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class MyStatisticsResponse {
+public class BlogStatisticsResponse {
     private long postsCount;
     private long likesCount;
     private long dislikesCount;
