@@ -5,7 +5,7 @@ spring:
     hibernate:
       ddl-auto: validate
   datasource:
-    url: jdbc:mysql://localhost:3306/blog-engine?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false&amp&serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/blog-engine?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false&amp&serverTimezone=Europe/Moscow
     driver-class-name: com.mysql.jdbc.Driver
     username: root
     password: qweqwe
