@@ -41,6 +41,10 @@ public class PostService {
 
     @Value("${blog_engine.additional.announceMaxLength}")
     private int ANNOUNCE_MAX_LENGTH;
+    @Value("${blog_engine.additional.postTitleMinLength}")
+    private int POST_TITLE_MIN_LENGTH;
+    @Value("${blog_engine.additional.postTextMinLength}")
+    private int POST_TEXT_MIN_LENGTH;
 
     public PostService(PostRepository postRepository, PostVoteRepository postVoteRepository, PostCommentsRepository postCommentsRepository, TagRepository tagRepository, UserRepository userRepository) {
         this.postRepository = postRepository;
@@ -137,13 +141,13 @@ public class PostService {
         PageRequest pageRequest = PageRequest.of(offset, limit);
         switch (status) {
             case NEW:
-                response = mapToPostResponse(postRepository.findPendingPosts(userId, pageRequest));
+                response = mapToPostResponse(postRepository.findNewPosts(userId, pageRequest));
                 break;
             case ACCEPTED:
-                response = mapToPostResponse(postRepository.findPublishedPosts(userId, pageRequest));
+                response = mapToPostResponse(postRepository.findModeratorAccepted(userId, pageRequest));
                 break;
             case DECLINED:
-                response = mapToPostResponse(postRepository.findDeclinedPosts(userId, pageRequest));
+                response = mapToPostResponse(postRepository.findModeratorDeclinedPosts(userId, pageRequest));
                 break;
         }
 
@@ -151,13 +155,13 @@ public class PostService {
     }
 
     public SimpleResponse updatePost(int postId, PostAddRequest requestData, String userEmail) {
-        if (requestData.getTitle().length() < 3 ||
-                requestData.getText().length() < 50) {
+        if (requestData.getTitle().length() < POST_TITLE_MIN_LENGTH ||
+                requestData.getText().length() < POST_TEXT_MIN_LENGTH) {
             ErrorResponse errorResponse = new ErrorResponse();
-            if (requestData.getTitle().length() < 3) {
-                errorResponse.addError("title", "Заголовок не установлен");
+            if (requestData.getTitle().length() < POST_TITLE_MIN_LENGTH) {
+                errorResponse.addError("title", "Заголовок слишком короткий");
             }
-            if (requestData.getText().length() < 50) {
+            if (requestData.getText().length() < POST_TEXT_MIN_LENGTH) {
                 errorResponse.addError("text", "Текст публикации слишком короткий");
             }
             return errorResponse;
@@ -177,13 +181,13 @@ public class PostService {
     }
 
     public SimpleResponse addPost(PostAddRequest requestData, String userEmail) {
-        if (requestData.getTitle().length() < 3 ||
-                requestData.getText().length() < 50) {
+        if (requestData.getTitle().length() < POST_TITLE_MIN_LENGTH ||
+                requestData.getText().length() < POST_TEXT_MIN_LENGTH) {
             ErrorResponse errorResponse = new ErrorResponse();
-            if (requestData.getTitle().length() < 3) {
+            if (requestData.getTitle().length() < POST_TITLE_MIN_LENGTH) {
                 errorResponse.addError("title", "Заголовок не установлен");
             }
-            if (requestData.getText().length() < 50) {
+            if (requestData.getText().length() < POST_TEXT_MIN_LENGTH) {
                 errorResponse.addError("text", "Текст публикации слишком короткий");
             }
             return errorResponse;

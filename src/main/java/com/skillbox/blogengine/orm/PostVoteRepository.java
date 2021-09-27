@@ -10,4 +10,7 @@ public interface PostVoteRepository extends JpaRepository<PostVote, Integer> {
 
     @Query("SELECT COUNT(*) > 0 FROM PostVote pv WHERE pv.post.id = :postId AND pv.user.id = :userId")
     boolean isUserVoted(int postId, int userId);
+
+    @Query("FROM PostVote pv WHERE pv.user.id = :userId and pv.post.id = :postId")
+    PostVote findByUserAndPostId(int userId, int postId);
 }

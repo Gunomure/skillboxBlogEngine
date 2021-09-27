@@ -3,7 +3,7 @@ values ('qwe', 'test1@mail.ru', 1, 'user_name1', '$2y$12$RrhSR3qnVbpk4yBuqAgXb.x
         now())
      , ('qwe', 'test2@mail.ru', 0, 'user_name2', '$2y$12$PB9KG0cthVErpLN1jX46/O7z3VhrldGp/mDT6dksygrR4Of4eehoe',
         'some link1', now())
-     , ('qwe', 'test3@mail.ru', 0, 'user_name3', '$2y$12$lNZlcHGLfhNB/G1JBAGPye3NFLge.x7bSyRfcEDYPSMEBLa7ipYwy',
+     , ('b55ca6ea6cb103c6384cfa366b7ce0bdcac092be26bc0', 'test3@mail.ru', 0, 'user_name3', '$2y$12$lNZlcHGLfhNB/G1JBAGPye3NFLge.x7bSyRfcEDYPSMEBLa7ipYwy',
         'some link2', now());
 
 insert into tags(name)
@@ -47,3 +47,6 @@ insert into post_votes(`time`, `value`, user_id, post_id)
 values (now(), 1, 1, 3)
      , (now(), -1, 2, 3)
      , (now(), 1, 3, 3);
+
+insert into captcha_codes(code, secret_code, time)
+values ('3166', 'eqKIqurpZs', now());

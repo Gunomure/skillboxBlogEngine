@@ -100,6 +100,9 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
 
     Post findPostById(int id);
 
+    @Query("FROM Post p order by p.id DESC")
+    List<Post> findDesc();
+
     Post save(Post post);
 
     // TODO возможно есть вариант без кастомного Query
@@ -121,7 +124,7 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             " LEFT JOIN p.author a" +
             " LEFT JOIN p.postVotes pv" +
             " WHERE p.isActive = FALSE" +
-            "     AND a.id = :userId" +
+            "     AND p.author.id = :userId" +
             " GROUP BY p.id, pc.post, pv.post")
     List<PostUserCounts> findInactivePosts(int userId, Pageable pageable);
 
@@ -140,8 +143,46 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             " LEFT JOIN p.author a" +
             " LEFT JOIN p.postVotes pv" +
             " WHERE p.isActive = TRUE AND p.moderationStatus = 'NEW'" +
+            "     AND p.author.id = :userId" +
             " GROUP BY p.id, pc.post, pv.post")
     List<PostUserCounts> findPendingPosts(int userId, Pageable pageable);
+
+    @Query("SELECT new com.skillbox.blogengine.model.custom.PostUserCounts(p.id AS id" +
+            "     , UNIX_TIMESTAMP(p.time)            AS timestamp" +
+            "     , a.id                              AS userId" +
+            "     , a.name                            AS userName" +
+            "     , p.title                           AS title" +
+            "     , p.text                            AS announce" +
+            "     , COUNT(CASE pv.value WHEN 1 THEN 1 ELSE NULL END)  AS likeCount" +
+            "     , COUNT(CASE pv.value WHEN -1 THEN 1 ELSE NULL END) AS dislikeCount" +
+            "     , COUNT(pc.id)                      AS commentCount" +
+            "     , p.viewCount                       AS viewCount)" +
+            " FROM Post p" +
+            " LEFT JOIN p.comments pc" +
+            " LEFT JOIN p.author a" +
+            " LEFT JOIN p.postVotes pv" +
+            " WHERE p.isActive = TRUE AND p.moderationStatus = 'NEW'" +
+            " GROUP BY p.id, pc.post, pv.post")
+    List<PostUserCounts> findNewPosts(int userId, Pageable pageable);
+
+    @Query("SELECT new com.skillbox.blogengine.model.custom.PostUserCounts(p.id AS id" +
+            "     , UNIX_TIMESTAMP(p.time)            AS timestamp" +
+            "     , a.id                              AS userId" +
+            "     , a.name                            AS userName" +
+            "     , p.title                           AS title" +
+            "     , p.text                            AS announce" +
+            "     , COUNT(CASE pv.value WHEN 1 THEN 1 ELSE NULL END)  AS likeCount" +
+            "     , COUNT(CASE pv.value WHEN -1 THEN 1 ELSE NULL END) AS dislikeCount" +
+            "     , COUNT(pc.id)                      AS commentCount" +
+            "     , p.viewCount                       AS viewCount)" +
+            " FROM Post p" +
+            " LEFT JOIN p.comments pc" +
+            " LEFT JOIN p.author a" +
+            " LEFT JOIN p.postVotes pv" +
+            " WHERE p.isActive = TRUE AND p.moderationStatus = 'DECLINED'" +
+            "     AND p.author.id = :userId" +
+            " GROUP BY p.id, pc.post, pv.post")
+    List<PostUserCounts> findDeclinedPosts(int userId, Pageable pageable);
 
     @Query("SELECT new com.skillbox.blogengine.model.custom.PostUserCounts(p.id AS id" +
             "     , UNIX_TIMESTAMP(p.time)            AS timestamp" +
@@ -160,7 +201,26 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             " WHERE p.isActive = TRUE AND p.moderationStatus = 'DECLINED'" +
             "     AND p.moderator.id = :userId" +
             " GROUP BY p.id, pc.post, pv.post")
-    List<PostUserCounts> findDeclinedPosts(int userId, Pageable pageable);
+    List<PostUserCounts> findModeratorDeclinedPosts(int userId, Pageable pageable);
+
+    @Query("SELECT new com.skillbox.blogengine.model.custom.PostUserCounts(p.id AS id" +
+            "     , UNIX_TIMESTAMP(p.time)            AS timestamp" +
+            "     , a.id                              AS userId" +
+            "     , a.name                            AS userName" +
+            "     , p.title                           AS title" +
+            "     , p.text                            AS announce" +
+            "     , COUNT(CASE pv.value WHEN 1 THEN 1 ELSE NULL END)  AS likeCount" +
+            "     , COUNT(CASE pv.value WHEN -1 THEN 1 ELSE NULL END) AS dislikeCount" +
+            "     , COUNT(pc.id)                      AS commentCount" +
+            "     , p.viewCount                       AS viewCount)" +
+            " FROM Post p" +
+            " LEFT JOIN p.comments pc" +
+            " LEFT JOIN p.author a" +
+            " LEFT JOIN p.postVotes pv" +
+            " WHERE p.isActive = TRUE AND p.moderationStatus = 'ACCEPTED'" +
+            "     AND p.author.id = :userId" +
+            " GROUP BY p.id, pc.post, pv.post")
+    List<PostUserCounts> findPublishedPosts(int userId, Pageable pageable);
 
     @Query("SELECT new com.skillbox.blogengine.model.custom.PostUserCounts(p.id AS id" +
             "     , UNIX_TIMESTAMP(p.time)            AS timestamp" +
@@ -179,7 +239,7 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             " WHERE p.isActive = TRUE AND p.moderationStatus = 'ACCEPTED'" +
             "     AND p.moderator.id = :userId" +
             " GROUP BY p.id, pc.post, pv.post")
-    List<PostUserCounts> findPublishedPosts(int userId, Pageable pageable);
+    List<PostUserCounts> findModeratorAccepted(int userId, Pageable pageable);
 
     @Query("SELECT COUNT(*) FROM Post p WHERE p.moderationStatus = 'NEW' AND p.isActive = TRUE AND p.moderator is NULL")
     int findPostsNeedToModerate();

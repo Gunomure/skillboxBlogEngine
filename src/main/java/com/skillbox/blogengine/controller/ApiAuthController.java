@@ -2,9 +2,8 @@ package com.skillbox.blogengine.controller;
 
 import com.skillbox.blogengine.controller.exception.UserNotAuthorizedException;
 import com.skillbox.blogengine.dto.*;
-import com.skillbox.blogengine.service.CaptchaService;
-import com.skillbox.blogengine.service.EmailSender;
 import com.skillbox.blogengine.service.AuthService;
+import com.skillbox.blogengine.service.CaptchaService;
 import com.skillbox.blogengine.service.UserService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

@@ -27,11 +27,6 @@ spring:
       mail.smtp.starttls.enable: true
       mail.debug: true
       mail.smtp.timeout: 10000
-  #logging:
-#  level:
-#    org:
-#      springframework:
-#        security: DEBUG
 
 blog_engine:
   title: DevPub
@@ -47,6 +42,8 @@ blog_engine:
     passwordMinLength: 6
     profilePhotoWidth: 36
     profilePhotoHeight: 36
+    postTitleMinLength: 3
+    postTextMinLength: 50
     websiteHost: localhost
   cloudinary:
     cloudName: skillbox

@@ -55,11 +55,17 @@ public class Post {
     @OneToMany(
             mappedBy = "post",
             cascade = CascadeType.ALL,
-            orphanRemoval = true
+            orphanRemoval = true,
+            fetch = FetchType.EAGER
     )
     private Set<TagToPost> tagToPost;
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(
+            mappedBy = "post",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.EAGER
+    )
     private Set<PostVote> postVotes;
 
     public void setTags(List<Tag> tagsToSet) {
@@ -81,14 +87,14 @@ public class Post {
                 "id=" + id +
                 ", isActive=" + isActive +
                 ", moderationStatus=" + moderationStatus +
-                ", moderator=" + moderator.getId() +
+                ", moderator=" + (moderator != null ? moderator.getId() : null) +
                 ", author=" + author.getId() +
                 ", time=" + time +
                 ", title='" + title + '\'' +
                 ", text='" + text + '\'' +
                 ", viewCount=" + viewCount +
-                ", tags=" + tagToPost.size() +
-                ", postVotes=" + postVotes.size() +
+                ", tags=" + (tagToPost == null ? 0 : tagToPost.size()) +
+                ", postVotes=" + (postVotes == null ? 0 : postVotes.size()) +
                 '}';
     }
 

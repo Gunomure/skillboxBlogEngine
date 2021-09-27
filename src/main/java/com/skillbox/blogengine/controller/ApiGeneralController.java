@@ -85,7 +85,7 @@ public class ApiGeneralController {
     public SimpleResponse updateProfile(Principal principal, @RequestBody ProfileData profileData) {
         LOGGER.info("Update profile for user: {}", principal.getName());
         generalService.updateProfile(principal.getName(), profileData);
-        return new SimpleResponse();
+        return new SimpleResponse(true);
     }
 
     @PostMapping(value = "/profile/my", produces = {MediaType.APPLICATION_JSON_VALUE},
@@ -101,7 +101,7 @@ public class ApiGeneralController {
         LOGGER.info("Update profile with image for user: {}", principal.getName());
         ProfileData profileData = new ProfileData(email, name, password.isEmpty() ? null : password, removePhoto, null);
         generalService.updateProfile(principal.getName(), profileData, photo);
-        return new SimpleResponse();
+        return new SimpleResponse(true);
     }
 
     @GetMapping("/statistics/my")
