@@ -3,10 +3,12 @@ package com.skillbox.blogengine.controllers;
 import com.skillbox.blogengine.controller.exception.BadRequestException;
 import com.skillbox.blogengine.dto.*;
 import com.skillbox.blogengine.dto.enums.ModerationStatusRequest;
+import com.skillbox.blogengine.model.GlobalSetting;
 import com.skillbox.blogengine.model.Post;
 import com.skillbox.blogengine.model.User;
 import com.skillbox.blogengine.model.enums.ModerationStatus;
 import com.skillbox.blogengine.orm.CaptchaRepository;
+import com.skillbox.blogengine.orm.GlobalSettingsRepository;
 import com.skillbox.blogengine.orm.PostRepository;
 import com.skillbox.blogengine.orm.UserRepository;
 import com.skillbox.blogengine.service.EmailSender;
@@ -19,12 +21,12 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -36,13 +38,13 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
     @Autowired
     UserRepository userRepository;
     @Autowired
+    GlobalSettingsRepository globalSettingsRepository;
+    @Autowired
     PasswordEncoder encoder;
     @Autowired
     EmailSender emailSender;
     @Value("${blog_engine.additional.uploadedMaxFileWeight}")
     private int FILE_MAX_WEIGHT;
-
-    private static final String LONG_POST_TEXT = "post text 4aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...";
 
     @Test
     void getInitTest() throws Exception {
@@ -73,24 +75,24 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$['STATISTICS_IS_PUBLIC']").exists());
     }
 
-    @Test
-    void imageUploadTest() throws Exception {
-        MockMultipartFile file = new MockMultipartFile("image.png",
-                "image.png",
-                MediaType.MULTIPART_FORM_DATA_VALUE,
-                "some xml".getBytes());
-        ImageData image = new ImageData();
-        image.setImage(file);
-
-        loginAsModerator();
-
-        mockMvc.perform(post("/api/image")
-                        .principal(principal)
-                        .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
-                        .flashAttr("image", image)
-                )
-                .andExpect(status().isOk());
-    }
+//    @Test
+//    void imageUploadTest() throws Exception {
+//        MockMultipartFile file = new MockMultipartFile("image.png",
+//                "image.png",
+//                MediaType.MULTIPART_FORM_DATA_VALUE,
+//                "some xml".getBytes());
+//        ImageData image = new ImageData();
+//        image.setImage(file);
+//
+//        loginAsModerator();
+//
+//        mockMvc.perform(post("/api/image")
+//                        .principal(principal)
+//                        .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+//                        .flashAttr("image", image)
+//                )
+//                .andExpect(status().isOk());
+//    }
 
     @Test
     void uploadWrongNamedImageShouldReturnErrorTest() throws Exception {
@@ -301,10 +303,28 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
                 .andExpect(content().json(expectedValue));
     }
 
-    /**
-     * TODO добавить тесты на проверку:
-     *
-     * 2 из строки announce удаляются html тэги
-     * остановился на /api/profile/my
-     */
+    @Test
+    @Transactional
+    void putGlobalSettingsTest() throws Exception {
+        loginAsModerator();
+
+        GlobalSettingsData setting = new GlobalSettingsData();
+        setting.setMultiuserMode(true);
+        setting.setPostPremoderation(true);
+        setting.setStatisticsIsPublic(true);
+        String requestData = mapper.writeValueAsString(setting);
+
+        mockMvc.perform(put("/api/settings")
+                        .principal(principal)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestData)
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+
+        List<GlobalSetting> allSettings = globalSettingsRepository.findAll();
+        for (GlobalSetting item : allSettings) {
+            assertEquals("YES", item.getValue());
+        }
+    }
 }

@@ -11,7 +11,7 @@ values ('tag1'),
        ('tag2');
 
 insert into posts(is_active, moderation_status, moderator_id, user_id, `time`, title, text, view_count)
-values (true, 'NEW', null, 1, now(), 'title 1', 'post text 1', 1)
+values (true, 'NEW', null, 1, now(), 'title 1', 'post <b>text</b> <strong>1</strong>', 1)
      , (true, 'ACCEPTED', 2, 1, '2021-02-01 12:00:00', 'title 2', 'post text 2', 10)
      , (true, 'ACCEPTED', 2, 2, '2021-01-01 12:00:00', 'title 3', 'post text 3', 100)
      , ( true, 'ACCEPTED', 1, 2, '2020-05-01 00:00:00', 'title 4'
