@@ -30,6 +30,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@Transactional
 public class ApiGeneralControllerTest extends AbstractIntegrationTest {
     @Autowired
     CaptchaRepository captchaRepository;
@@ -175,7 +176,6 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Transactional
     void postMyProfileChangeNameAndEmailTest() throws Exception {
         loginAsModerator();
 
@@ -200,7 +200,6 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Transactional
     void postMyProfileRegisteredUserTest() throws Exception {
         loginAsUser();
 
@@ -223,7 +222,6 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Transactional
     void postMyProfileChangePasswordTest() throws Exception {
         loginAsUser();
 
@@ -248,7 +246,6 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Transactional
     void postMyProfileTooShortPasswordTest() throws Exception {
         loginAsUser();
 
@@ -304,7 +301,6 @@ public class ApiGeneralControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Transactional
     void putGlobalSettingsTest() throws Exception {
         loginAsModerator();
 

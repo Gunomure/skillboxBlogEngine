@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@Transactional
 public class ApiAuthControllerTest extends AbstractIntegrationTest {
 
     @Autowired
@@ -157,7 +158,6 @@ public class ApiAuthControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Transactional
     void postRestorePasswordTest() throws Exception {
         User user = userRepository.findByEmail("test3@mail.ru").get();
         CaptchaCode captcha = captchaRepository.findCaptchaCodeBySecretCode("eqKIqurpZs");
@@ -179,7 +179,6 @@ public class ApiAuthControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Transactional
     void postRestorePasswordTooShortPasswordTest() throws Exception {
         User user = userRepository.findByEmail("test3@mail.ru").get();
         CaptchaCode captcha = captchaRepository.findCaptchaCodeBySecretCode("eqKIqurpZs");
@@ -201,7 +200,6 @@ public class ApiAuthControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Transactional
     void postRestorePasswordWrongCodeTest() throws Exception {
         CaptchaCode captcha = captchaRepository.findCaptchaCodeBySecretCode("eqKIqurpZs");
         String newPassword = "123456";
@@ -222,7 +220,6 @@ public class ApiAuthControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Transactional
     void postRestorePasswordWrongCaptchaTest() throws Exception {
         User user = userRepository.findByEmail("test3@mail.ru").get();
         CaptchaCode captcha = captchaRepository.findCaptchaCodeBySecretCode("eqKIqurpZs");
