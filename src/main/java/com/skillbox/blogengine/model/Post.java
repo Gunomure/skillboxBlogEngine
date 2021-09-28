@@ -1,10 +1,13 @@
 package com.skillbox.blogengine.model;
 
+import com.skillbox.blogengine.model.enums.ModerationStatus;
 import lombok.Data;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -52,12 +55,31 @@ public class Post {
     @OneToMany(
             mappedBy = "post",
             cascade = CascadeType.ALL,
-            orphanRemoval = true
+            orphanRemoval = true,
+            fetch = FetchType.EAGER
     )
     private Set<TagToPost> tagToPost;
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(
+            mappedBy = "post",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.EAGER
+    )
     private Set<PostVote> postVotes;
+
+    public void setTags(List<Tag> tagsToSet) {
+        if (this.tagToPost == null) {
+            this.tagToPost = new HashSet<>();
+        }
+        this.tagToPost.clear();
+        for (Tag tag : tagsToSet) {
+            TagToPost tagToPost = new TagToPost();
+            tagToPost.setPost(this);
+            tagToPost.setTag(tag);
+            this.tagToPost.add(tagToPost);
+        }
+    }
 
     @Override
     public String toString() {
@@ -65,14 +87,14 @@ public class Post {
                 "id=" + id +
                 ", isActive=" + isActive +
                 ", moderationStatus=" + moderationStatus +
-                ", moderator=" + moderator.getId() +
+                ", moderator=" + (moderator != null ? moderator.getId() : null) +
                 ", author=" + author.getId() +
                 ", time=" + time +
                 ", title='" + title + '\'' +
                 ", text='" + text + '\'' +
                 ", viewCount=" + viewCount +
-                ", tags=" + tagToPost.size() +
-                ", postVotes=" + postVotes.size() +
+                ", tags=" + (tagToPost == null ? 0 : tagToPost.size()) +
+                ", postVotes=" + (postVotes == null ? 0 : postVotes.size()) +
                 '}';
     }
 

@@ -47,4 +47,16 @@ public class PostComment {
     public int hashCode() {
         return Objects.hash(id, parent, time, text);
     }
+
+    @Override
+    public String toString() {
+        return "PostComment{" +
+                "id=" + id +
+                ", parent=" + (parent == null ? null : parent.getId()) +
+                ", post=" + post.getId() +
+                ", user=" + user.getId() +
+                ", time=" + time +
+                ", text='" + text + '\'' +
+                '}';
+    }
 }

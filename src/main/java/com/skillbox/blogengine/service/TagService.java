@@ -1,6 +1,7 @@
 package com.skillbox.blogengine.service;
 
 import com.skillbox.blogengine.dto.TagResponse;
+import com.skillbox.blogengine.model.Tag;
 import com.skillbox.blogengine.model.custom.TagUsageStatistics;
 import com.skillbox.blogengine.orm.TagRepository;
 import org.apache.logging.log4j.LogManager;
@@ -30,6 +31,18 @@ public class TagService {
         long postsCount = postService.count();
         List<TagUsageStatistics> tagUsageStatistics = tagRepository.findTagsByNameWithUsages(tagPartName, Sort.by("useInPostsCount").descending());
         return map(tagUsageStatistics, postsCount);
+    }
+
+    public void addTags(List<String> tags) {
+        for (String tag : tags) {
+            addTag(tag);
+        }
+    }
+
+    public void addTag(String tag) {
+        Tag newTag = new Tag();
+        newTag.setName(tag);
+        tagRepository.save(newTag);
     }
 
     public static TagResponse map(List<TagUsageStatistics> tagsUsageStatistics, long postsCount) {

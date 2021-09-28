@@ -1,45 +1,54 @@
 package com.skillbox.blogengine.service;
 
 import com.skillbox.blogengine.controller.exception.EntityNotFoundException;
+import com.skillbox.blogengine.controller.exception.SimpleException;
+import com.skillbox.blogengine.controller.exception.UserNotAuthorizedException;
 import com.skillbox.blogengine.dto.*;
-import com.skillbox.blogengine.model.ModerationStatus;
+import com.skillbox.blogengine.dto.enums.ModeType;
+import com.skillbox.blogengine.dto.enums.ModerationStatusRequest;
 import com.skillbox.blogengine.model.Post;
+import com.skillbox.blogengine.model.PostVote;
+import com.skillbox.blogengine.model.Tag;
 import com.skillbox.blogengine.model.User;
 import com.skillbox.blogengine.model.custom.CommentUserInfo;
 import com.skillbox.blogengine.model.custom.PostUserCounts;
 import com.skillbox.blogengine.model.custom.PostWithComments;
 import com.skillbox.blogengine.model.custom.PostsCountPerDate;
-import com.skillbox.blogengine.orm.PostCommentsRepository;
-import com.skillbox.blogengine.orm.PostRepository;
-import com.skillbox.blogengine.orm.TagRepository;
-import com.skillbox.blogengine.orm.UserRepository;
+import com.skillbox.blogengine.model.enums.ModerationStatus;
+import com.skillbox.blogengine.orm.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jsoup.Jsoup;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class PostService {
 
     private final static Logger LOGGER = LogManager.getLogger(PostService.class);
     private final PostRepository postRepository;
+    private final PostVoteRepository postVoteRepository;
     private final PostCommentsRepository postCommentsRepository;
     private final TagRepository tagRepository;
     private final UserRepository userRepository;
 
-    private static final int ANNOUNCE_MAX_LENGTH = 150;
+    @Value("${blog_engine.additional.announceMaxLength}")
+    private int ANNOUNCE_MAX_LENGTH;
+    @Value("${blog_engine.additional.postTitleMinLength}")
+    private int POST_TITLE_MIN_LENGTH;
+    @Value("${blog_engine.additional.postTextMinLength}")
+    private int POST_TEXT_MIN_LENGTH;
 
-    public PostService(PostRepository postRepository, PostCommentsRepository postCommentsRepository, TagRepository tagRepository, UserRepository userRepository) {
+    public PostService(PostRepository postRepository, PostVoteRepository postVoteRepository, PostCommentsRepository postCommentsRepository, TagRepository tagRepository, UserRepository userRepository) {
         this.postRepository = postRepository;
+        this.postVoteRepository = postVoteRepository;
         this.postCommentsRepository = postCommentsRepository;
         this.tagRepository = tagRepository;
         this.userRepository = userRepository;
@@ -81,7 +90,9 @@ public class PostService {
         return mapToPostResponse(postRepository.findPostsInfoByTag(tag, pageRequest));
     }
 
-    public PostByIdResponse selectPostsById(int postId) {
+    public PostByIdResponse selectPostsById(int postId, Principal principal) {
+        Optional<User> currentUser = userRepository.findByEmail(principal != null ? principal.getName() : "");
+
         // заполняем comments в response
         PostWithComments postInfoById = postRepository.findPostInfoById(postId);
         List<CommentUserInfo> commentsByPostId;
@@ -91,7 +102,12 @@ public class PostService {
             // заполняем основную часть response
             tagsByPostId = tagRepository.findTagsByPostId(postId);
             Post postById = postRepository.findPostById(postId);
-            postById.setViewCount(postById.getViewCount() + 1);
+            // увеличиваем просмотры, если пользователь не модератор и не автор поста
+            if (currentUser.isPresent() && !currentUser.get().isModerator()
+                    && currentUser.get().getId() != postInfoById.getUserId()) {
+                postById.setViewCount(postById.getViewCount() + 1);
+            }
+
             postRepository.save(postById);
         } else {
             throw new EntityNotFoundException("Document not found");
@@ -125,47 +141,105 @@ public class PostService {
         PageRequest pageRequest = PageRequest.of(offset, limit);
         switch (status) {
             case NEW:
-                response = mapToPostResponse(postRepository.findPendingPosts(userId, pageRequest));
+                response = mapToPostResponse(postRepository.findNewPosts(userId, pageRequest));
                 break;
             case ACCEPTED:
-                response = mapToPostResponse(postRepository.findPublishedPosts(userId, pageRequest));
+                response = mapToPostResponse(postRepository.findModeratorAccepted(userId, pageRequest));
                 break;
             case DECLINED:
-                response = mapToPostResponse(postRepository.findDeclinedPosts(userId, pageRequest));
+                response = mapToPostResponse(postRepository.findModeratorDeclinedPosts(userId, pageRequest));
                 break;
         }
 
         return response;
     }
 
+    public SimpleResponse updatePost(int postId, PostAddRequest requestData, String userEmail) {
+        if (requestData.getTitle().length() < POST_TITLE_MIN_LENGTH ||
+                requestData.getText().length() < POST_TEXT_MIN_LENGTH) {
+            ErrorResponse errorResponse = new ErrorResponse();
+            if (requestData.getTitle().length() < POST_TITLE_MIN_LENGTH) {
+                errorResponse.addError("title", "Заголовок слишком короткий");
+            }
+            if (requestData.getText().length() < POST_TEXT_MIN_LENGTH) {
+                errorResponse.addError("text", "Текст публикации слишком короткий");
+            }
+            return errorResponse;
+        } else {
+            User user = userRepository.findByEmail(userEmail)
+                    .orElseThrow(() -> new EntityNotFoundException("User " + userEmail + " not found"));
+            Post post = postRepository.findPostById(postId);
+
+            fillPost(post, requestData);
+            if (!user.isModerator()) {
+                post.setModerationStatus(ModerationStatus.NEW);
+            }
+
+            postRepository.save(post);
+            return new SimpleResponse(true);
+        }
+    }
+
     public SimpleResponse addPost(PostAddRequest requestData, String userEmail) {
-        ErrorResponse errorResponse = new ErrorResponse();
-        if (requestData.getTitle().length() < 3 ||
-                requestData.getText().length() < 50) {
-            if (requestData.getTitle().length() < 3) {
+        if (requestData.getTitle().length() < POST_TITLE_MIN_LENGTH ||
+                requestData.getText().length() < POST_TEXT_MIN_LENGTH) {
+            ErrorResponse errorResponse = new ErrorResponse();
+            if (requestData.getTitle().length() < POST_TITLE_MIN_LENGTH) {
                 errorResponse.addError("title", "Заголовок не установлен");
             }
-            if (requestData.getText().length() < 50) {
+            if (requestData.getText().length() < POST_TEXT_MIN_LENGTH) {
                 errorResponse.addError("text", "Текст публикации слишком короткий");
             }
             return errorResponse;
         } else {
             Post post = new Post();
-            post.setActive(true);
             User user = userRepository.findByEmail(userEmail)
                     .orElseThrow(() -> new EntityNotFoundException("User " + userEmail + " not found"));
-            post.setAuthor(user);
-            post.setText(requestData.getText());
-            post.setTitle(requestData.getTitle());
+
+            fillPost(post, requestData);
+            post.setActive(true);
             post.setModerationStatus(ModerationStatus.NEW);
-            if (LocalDateTime.ofEpochSecond(requestData.getTimestamp(), 0, ZoneOffset.UTC)
-                    .isBefore(LocalDateTime.now())) {
-                post.setTime(LocalDateTime.now());
-            } else {
-                post.setTime(LocalDateTime.ofEpochSecond(requestData.getTimestamp(), 0, ZoneOffset.UTC));
-            }
+            post.setAuthor(user);
+
             postRepository.save(post);
             return new SimpleResponse(true);
+        }
+    }
+
+    private void fillPost(Post post, PostAddRequest requestData) {
+        post.setTitle(requestData.getTitle());
+        post.setActive(requestData.isActive());
+        post.setText(requestData.getText());
+        post.setTime(timestampToUtcDatetime(requestData.getTimestamp()));
+
+        List<Tag> tagsFromRepository = tagRepository.findByNameIn(requestData.getTags());
+        post.setTags(tagsFromRepository);
+    }
+
+    public void moderatePost(PostStatusModerationData moderationData, String userEmail) {
+        Optional<User> user = userRepository.findByEmail(userEmail);
+        if (user.isEmpty() || !user.get().isModerator()) {
+            throw new SimpleException("User does not exist or is not a moderator");
+        } else if (!postRepository.existsById(moderationData.getPostId())) {
+            throw new SimpleException(String.format("Post %d does not exist", moderationData.getPostId()));
+        }
+
+        Post post = postRepository.findPostById(moderationData.getPostId());
+        if (moderationData.getDecision().equals(ModerationStatusRequest.accept)) {
+            post.setModerationStatus(ModerationStatus.ACCEPTED);
+        } else {
+            post.setModerationStatus(ModerationStatus.DECLINED);
+        }
+
+        postRepository.save(post);
+    }
+
+    private LocalDateTime timestampToUtcDatetime(long timestamp) {
+        if (LocalDateTime.ofEpochSecond(timestamp, 0, ZoneOffset.UTC)
+                .isBefore(LocalDateTime.now())) {
+            return LocalDateTime.now();
+        } else {
+            return LocalDateTime.ofEpochSecond(timestamp, 0, ZoneOffset.UTC);
         }
     }
 
@@ -220,7 +294,7 @@ public class PostService {
         return postByIdResponse;
     }
 
-    public static PostResponse mapToPostResponse(List<PostUserCounts> postsAdditionalInfo) {
+    public PostResponse mapToPostResponse(List<PostUserCounts> postsAdditionalInfo) {
         PostResponse response = new PostResponse();
         response.setCount(postsAdditionalInfo.size());
 
@@ -232,7 +306,7 @@ public class PostService {
         return response;
     }
 
-    private static PostResponse.PostInfo createPostInfo(PostUserCounts post) {
+    private PostResponse.PostInfo createPostInfo(PostUserCounts post) {
         // так проще всего удалить html тэги
         String announceWithoutTags = Jsoup.parse(post.getAnnounce()).text();
         if (announceWithoutTags.length() > ANNOUNCE_MAX_LENGTH) {
@@ -243,5 +317,39 @@ public class PostService {
 
         return new PostResponse.PostInfo(post.getId(), post.getTimestamp(), new PostResponse.PostInfo.UserInfo(post.getUserId(), post.getUserName()),
                 post.getTitle(), announceWithoutTags, post.getLikeCount(), post.getDislikeCount(), post.getCommentCount(), post.getViewCount());
+    }
+
+    public BlogStatisticsResponse getMyStatistics(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new UserNotAuthorizedException(String.format("User %s not found", email)));
+        return postRepository.findMyStatistics(user.getId());
+    }
+
+    public BlogStatisticsResponse getCommonStatistics() {
+        return postRepository.findCommonStatistics();
+    }
+
+    public void votePost(PostVoteData voteData, String email, boolean like) {
+        Post post = postRepository.findPostById(voteData.getPostId());
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new UserNotAuthorizedException(String.format("User %s not found", email)));
+
+
+        if (post == null) {
+            throw new SimpleException(String.format("Post %d not found", voteData.getPostId()));
+        }
+
+        boolean userAlreadyVoted = postVoteRepository.isUserVoted(post.getId(), user.getId());
+        LOGGER.info("user voted: {}", userAlreadyVoted);
+        if (userAlreadyVoted) {
+            throw new SimpleException(String.format("User %s has already voted", email));
+        }
+
+        PostVote postVote = new PostVote();
+        postVote.setTime(LocalDateTime.now());
+        postVote.setPost(post);
+        postVote.setValue(like ? 1 : -1);
+        postVote.setUser(user);
+        postVoteRepository.save(postVote);
     }
 }

@@ -1,4 +1,4 @@
-package com.skillbox.blogengine.dto;
+package com.skillbox.blogengine.dto.enums;
 
 public enum ModeType {
     recent,

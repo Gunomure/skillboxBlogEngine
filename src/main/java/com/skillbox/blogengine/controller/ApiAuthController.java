@@ -2,8 +2,8 @@ package com.skillbox.blogengine.controller;
 
 import com.skillbox.blogengine.controller.exception.UserNotAuthorizedException;
 import com.skillbox.blogengine.dto.*;
+import com.skillbox.blogengine.service.AuthService;
 import com.skillbox.blogengine.service.CaptchaService;
-import com.skillbox.blogengine.service.RegisterService;
 import com.skillbox.blogengine.service.UserService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,13 +25,13 @@ public class ApiAuthController {
 
     private final UserService userService;
     private final CaptchaService captchaService;
-    private final RegisterService registerService;
+    private final AuthService authService;
     private final AuthenticationManager authenticationManager;
 
-    public ApiAuthController(UserService userService, CaptchaService captchaService, RegisterService registerService, AuthenticationManager authenticationManager) {
+    public ApiAuthController(UserService userService, CaptchaService captchaService, AuthService authService, AuthenticationManager authenticationManager) {
         this.userService = userService;
         this.captchaService = captchaService;
-        this.registerService = registerService;
+        this.authService = authService;
         this.authenticationManager = authenticationManager;
     }
 
@@ -79,6 +79,20 @@ public class ApiAuthController {
 
     @PostMapping("/register")
     public SimpleResponse postRegister(@RequestBody UserRegisterData userRegisterData) {
-        return registerService.registerUser(userRegisterData);
+        return authService.registerUser(userRegisterData);
+    }
+
+    @PostMapping("/restore")
+    public SimpleResponse restorePassword(@RequestBody RestorePasswordData restoreData) {
+        LOGGER.info("Send email to {}", restoreData.getEmail());
+        authService.sendRestoreEmail(restoreData.getEmail());
+        return new SimpleResponse(true);
+    }
+
+    @PostMapping("/password")
+    public SimpleResponse updatePassword(@RequestBody PasswordUpdateData passwordUpdateData) {
+        authService.updatePassword(passwordUpdateData);
+
+        return new SimpleResponse(true);
     }
 }

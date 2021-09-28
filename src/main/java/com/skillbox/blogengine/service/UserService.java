@@ -2,9 +2,10 @@ package com.skillbox.blogengine.service;
 
 import com.skillbox.blogengine.controller.exception.EntityNotFoundException;
 import com.skillbox.blogengine.dto.LoggedUserResponse;
-import com.skillbox.blogengine.model.ModerationStatus;
+import com.skillbox.blogengine.model.enums.ModerationStatus;
 import com.skillbox.blogengine.model.Post;
 import com.skillbox.blogengine.model.User;
+import com.skillbox.blogengine.orm.PostRepository;
 import com.skillbox.blogengine.orm.UserRepository;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -12,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Service
 @Transactional
@@ -20,9 +20,11 @@ public class UserService {
 
     private final static Logger LOGGER = Logger.getLogger(UserService.class);
     private final UserRepository userRepository;
+    private final PostRepository postRepository;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PostRepository postRepository) {
         this.userRepository = userRepository;
+        this.postRepository = postRepository;
     }
 
     public List<User> selectAll() {
@@ -50,22 +52,12 @@ public class UserService {
         userLoggedData.setEmail(user.getEmail());
         if (user.isModerator()) {
             System.out.println("user is moderator" + user.isModerator());
-            Set<Post> posts = user.getPostsModerated();
-            int moderationCount = 0;
-            for (Post post : posts) {
-                if (post.getModerationStatus() == ModerationStatus.NEW) {
-                    moderationCount++;
-                }
-            }
+            int postsNeedToModerate = postRepository.findPostsNeedToModerate();
             userLoggedData.setModeration(true);
-            userLoggedData.setModerationCount(moderationCount);
+            userLoggedData.setModerationCount(postsNeedToModerate);
             userLoggedData.setSettings(true); // true если пользователь является модератором
         }
         userResponse.setUser(userLoggedData);
-//        else {
-//            userResponse.setModeration(false);
-//            userResponse.setModerationCount(0);
-//        }
         return userResponse;
     }
 }

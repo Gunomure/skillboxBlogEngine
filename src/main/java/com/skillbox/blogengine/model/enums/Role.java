@@ -1,5 +1,6 @@
-package com.skillbox.blogengine.model;
+package com.skillbox.blogengine.model.enums;
 
+import com.skillbox.blogengine.model.enums.Permission;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.Set;

@@ -1,5 +1,6 @@
 package com.skillbox.blogengine.model;
 
+import com.skillbox.blogengine.model.enums.Role;
 import lombok.Data;
 import org.springframework.lang.Nullable;
 

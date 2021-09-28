@@ -5,18 +5,28 @@ spring:
     hibernate:
       ddl-auto: validate
   datasource:
-    url: jdbc:mysql://localhost:3306/blog-engine?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false&amp&serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/blog-engine?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false&amp&serverTimezone=Europe/Moscow
     driver-class-name: com.mysql.jdbc.Driver
     username: root
     password: qweqwe
   flyway:
     baseline-on-migrate: true
-
-#logging:
-#  level:
-#    org:
-#      springframework:
-#        security: DEBUG
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: tyunyaevds@gmail.com
+    password:
+    protocol: smtp
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.debug: true
+      mail.smtp.timeout: 10000
 
 blog_engine:
   title: DevPub
@@ -25,3 +35,17 @@ blog_engine:
   email: mail@mail.ru
   copyright: Дмитрий Сергеев
   copyrightFrom: 2005
+  additional:
+    announceMaxLength: 150
+    uploadedMaxFileWeight: 5242880 # TODO разделить файл для комментов и файл для профиля?
+    commentMinLength: 3
+    passwordMinLength: 6
+    profilePhotoWidth: 36
+    profilePhotoHeight: 36
+    postTitleMinLength: 3
+    postTextMinLength: 50
+    websiteHost: localhost
+  cloudinary:
+    cloudName: skillbox
+    apiKey:
+    apiSecret:
