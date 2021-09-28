@@ -48,7 +48,7 @@ blog_engine:
     profilePhotoHeight: 36
     postTitleMinLength: 3
     postTextMinLength: 50
-    websiteHost: localhost
+    websiteHost: dtyunyaev-skillbox-blog.herokuapp.com
   cloudinary:
     cloudName: skillbox
     apiKey: 575285673499468

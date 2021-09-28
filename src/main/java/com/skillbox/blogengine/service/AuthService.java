@@ -35,7 +35,7 @@ public class AuthService {
 
     @Value("${blog_engine.additional.websiteHost}")
     private String WEBSITE_HOST;
-    private final static String EMAIL_TEMPLATE = "<a href=\"http://%s:8080/login/change-password/%s\">Click to restore your password</a>";
+    private final static String EMAIL_TEMPLATE = "<a href=\"https://%s/login/change-password/%s\">Click to restore your password</a>";
 
     public AuthService(UserRepository userRepository, CaptchaRepository captchaRepository, SecurityConfig securityConfig, EmailSender emailSender, PasswordEncoder encoder) {
         this.userRepository = userRepository;
