@@ -21,12 +21,10 @@ public class ApiPostController {
 
     private final PostService postService;
     private final UserService userService;
-    private final TagService tagService;
 
-    public ApiPostController(PostService postService, UserService userService, TagService tagService) {
+    public ApiPostController(PostService postService, UserService userService) {
         this.postService = postService;
         this.userService = userService;
-        this.tagService = tagService;
     }
 
     @GetMapping("/post")
