@@ -1,16 +1,20 @@
+server:
+  port: ${PORT:8080}
+
 spring:
   jpa:
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
     show-sql: true
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
   datasource:
-    url: jdbc:mysql://localhost:3306/blog-engine?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false&amp&serverTimezone=Europe/Moscow
+    url: jdbc:${JAWSDB_URL:mysql://localhost:3306/blog-engine?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false&amp&serverTimezone=Europe/Moscow}
     driver-class-name: com.mysql.jdbc.Driver
     username: root
     password: qweqwe
   flyway:
     baseline-on-migrate: true
+    enabled: true
   servlet:
     multipart:
       enabled: true
@@ -20,7 +24,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: tyunyaevds@gmail.com
-    password:
+    password: kspggftfqchbfgws
     protocol: smtp
     properties:
       mail.smtp.auth: true
@@ -47,5 +51,5 @@ blog_engine:
     websiteHost: localhost
   cloudinary:
     cloudName: skillbox
-    apiKey:
-    apiSecret:
+    apiKey: 575285673499468
+    apiSecret: mZlWIlTniwVAjUbiOiwadRrZvTU
