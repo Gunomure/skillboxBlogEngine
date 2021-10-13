@@ -181,6 +181,7 @@
                 </configuration>
             </plugin>
         </plugins>
+        <finalName>skillbox_blog_engine</finalName>
     </build>
 
 </project>
